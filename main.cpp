@@ -1,7 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <iostream>
+
+#include "wrapper/checkError.h"
 
 void frameBufferSizeCallBack(GLFWwindow* window, int width, int height) {
     std::cout << "size: " << width << ", " << height << std::endl;
@@ -67,7 +68,7 @@ int main() {
         glfwPollEvents();
 
         // 清理画布
-        glClear(GL_COLOR_BUFFER_BIT);
+        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
         // 渲染操作
 
