@@ -17,8 +17,10 @@ link_directories(
 
 add_subdirectory(wrapper)
 
+add_subdirectory(application)
+
 add_executable(openglStudy "main.cpp" "glad.c")
 
 find_package(glfw3 3.4 REQUIRED)
 
-target_link_libraries(openglStudy glfw wrapper)
+target_link_libraries(openglStudy glfw wrapper app)
