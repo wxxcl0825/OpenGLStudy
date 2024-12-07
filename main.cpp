@@ -49,7 +49,13 @@ int main() {
     // 设置监听
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
     glfwSetKeyCallback(window, keyCallBack);
-    
+
+    // 使用glad加载所有当前版本的openGL函数
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
     // 3. 执行窗体循环
     while (!glfwWindowShouldClose(window)) {
         // 接收并分发窗体信息
