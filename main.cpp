@@ -5,13 +5,11 @@
 #include "wrapper/checkError.h"
 #include "application/Application.h"
 
-void frameBufferSizeCallBack(GLFWwindow* window, int width, int height) {
-    std::cout << "size: " << width << ", " << height << std::endl;
-    glViewport(0, 0, width, height);
+void OnResize(int width, int height) {
+    GL_CALL(glViewport(0, 0, width, height));
 }
 
-void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    // scancode: 物理按键位置
+void onKey(int key, int action, int mods) {
     // if (key == GLFW_KEY_W) {
 
     // }
@@ -40,9 +38,8 @@ int main() {
     if (!app->init(800, 600))
         return -1;
 
-    // 设置监听
-    // glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
-    // glfwSetKeyCallback(window, keyCallBack);
+    app->setResizeCallback(OnResize);
+    app->setKeyBoardCallBack(onKey);
 
     // 设置openGL视口并清理颜色
     glViewport(0, 0, 800, 600);
