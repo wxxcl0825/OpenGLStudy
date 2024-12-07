@@ -5,6 +5,7 @@
 
 void frameBufferSizeCallBack(GLFWwindow* window, int width, int height) {
     std::cout << "size: " << width << ", " << height << std::endl;
+    glViewport(0, 0, width, height);
 }
 
 void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -56,10 +57,22 @@ int main() {
         return -1;
     }
 
+    // 设置openGL视口并清理颜色
+    glViewport(0, 0, 800, 600);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
+
     // 3. 执行窗体循环
     while (!glfwWindowShouldClose(window)) {
         // 接收并分发窗体信息
         glfwPollEvents();
+
+        // 清理画布
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // 渲染操作
+
+        // 切换双缓存
+        glfwSwapBuffers(window);
     }
 
     // 4. 退出程序前做相关清理
