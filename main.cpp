@@ -1,6 +1,38 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+
+void frameBufferSizeCallBack(GLFWwindow* window, int width, int height) {
+    std::cout << "size: " << width << ", " << height << std::endl;
+}
+
+void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    // scancode: 物理按键位置
+    // if (key == GLFW_KEY_W) {
+
+    // }
+
+    // if (action == GLFW_PRESS) {
+
+    // }
+
+    // if (action == GLFW_RELEASE) {
+
+    // }
+
+    // if (mods == GLFW_MOD_CONTROL) {
+
+    // }
+
+    // if (mods == GLFW_MOD_SHIFT) {
+
+    // }
+    std::cout << "Key Pressed: " << key << std::endl;
+    std::cout << "action: " << action << std::endl;
+    std::cout << "mods: " << mods << std::endl;
+}
+
 int main() {
     // 1. 初始化GLFW基本环境
     glfwInit();
@@ -13,6 +45,10 @@ int main() {
     // 2. 创建窗体对象
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGLStudy", NULL, NULL);
     glfwMakeContextCurrent(window);
+
+    // 设置监听
+    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallBack);
+    glfwSetKeyCallback(window, keyCallBack);
     
     // 3. 执行窗体循环
     while (!glfwWindowShouldClose(window)) {
