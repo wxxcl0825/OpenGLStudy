@@ -12,7 +12,9 @@ public:
     void begin(); // 开始使用当前Shader
     void end(); // 结束使用当前Shader
 
-    GLuint mProgram{0};
+    void setFloat(const std::string &name, float value);
 private:
+    GLuint mProgram{0};
+
     void checkShaderErrors(GLuint target, std::string type);  // 检查编译/链接错误
 };

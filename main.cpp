@@ -161,18 +161,14 @@ void prepareVAO() {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    // 动态获取属性位置
-    GLuint posLocation = glGetAttribLocation(shader->mProgram, "aPos");
-    GLuint colorLocation = glGetAttribLocation(shader->mProgram, "aColor");
-
     // 绑定vbo, ebo, 加入描述信息
     glBindBuffer(GL_ARRAY_BUFFER, posVbo); // 可以省略
-    glEnableVertexAttribArray(posLocation);
-    glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);  // 该语句会寻找当前已绑定的vbo, 故只需在vbo绑定后即可(vbo绑定要在vao写入数据之前)
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);  // 该语句会寻找当前已绑定的vbo, 故只需在vbo绑定后即可(vbo绑定要在vao写入数据之前)
 
     glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
-    glEnableVertexAttribArray(colorLocation);
-    glVertexAttribPointer(colorLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0); 
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0); 
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); // 不可省略, 要在vao绑定后才能把ebo绑给绑过的vao(ebo绑定要在vao绑定之后)
 
@@ -190,6 +186,8 @@ void render() {
     // 渲染操作
     // 绑定program(选择材质)
     shader->begin();
+
+    shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
