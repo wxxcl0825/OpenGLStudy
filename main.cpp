@@ -100,6 +100,30 @@ void prepareInterleavedBuffer() {
     GL_CALL(glBindVertexArray(0));
 }
 
+void prepareVAOForGLTriangles() {
+    float positions[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+        0.8f, 0.8f, 0.0f,
+        0.8f, 0.0f, 0.0f,
+    };
+
+    GLuint posVbo;
+    glGenBuffers(1, &posVbo);
+
+    glBindBuffer(GL_ARRAY_BUFFER, posVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+
+    glBindVertexArray(0);
+}
+
 void prepareShader() {
     const char* vertexShaderSource = 
         "#version 410 core\n"
@@ -192,7 +216,7 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
     prepareShader();
-    prepareInterleavedBuffer();
+    prepareVAOForGLTriangles();
 
     // 执行窗体循环
     while (app->update()) {
