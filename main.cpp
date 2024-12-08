@@ -34,40 +34,6 @@ void onKey(int key, int action, int mods) {
     std::cout << "mods: " << mods << std::endl;
 }
 
-void prepareVBO() {
-    // VBO: GPU显存数据段的编号
-    // 创建一个VBO(显存未分配)
-    GLuint vbo = 0;
-    GL_CALL(glGenBuffers(1, &vbo));
-
-    // 销毁一个VBO
-    GL_CALL(glDeleteBuffers(1, &vbo));
-
-    // 创建n个VBO
-    GLuint vboArr[] = {0, 0, 0};
-    GL_CALL(glGenBuffers(3, vboArr));
-
-    // 销毁n个VBO
-    GL_CALL(glDeleteBuffers(3, vboArr));
-    
-}
-
-void prepare() {
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f
-    };
-    GLuint vbo;
-    GL_CALL(glGenBuffers(1, &vbo));
-
-    // 绑定VBO到openGL插槽
-    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));  // VBO插槽: GL_ARRAY_BUFFER
-
-    // 向当前VBO传输数据, 开辟显存
-    GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));  // 静态数据GL_STATIC_DRAW, 动态数据GL_DYNAMIC_DRAW
-}
-
 void prepareSingleBuffer() {
     // 为数据各自生成一个vbo, 为分开的vbo各自填充数据
     float positions[] = {
@@ -89,6 +55,21 @@ void prepareSingleBuffer() {
 
     GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, colorVbo));
     GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW));
+
+    // 生成vao, 并分别加入vao
+    GLuint vao = 0;
+    GL_CALL(glGenVertexArrays(1, &vao));
+    GL_CALL(glBindVertexArray(vao));
+
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, posVbo));  // 绑定vbo, 下面属性描述才能与该vbo相关
+    GL_CALL(glEnableVertexAttribArray(0));  // vao的0号位
+    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0));  // 压入属性描述
+
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, colorVbo));
+    GL_CALL(glEnableVertexAttribArray(1));
+    GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0));
+
+    GL_CALL(glBindVertexArray(0));  // vao解绑
 }
 
 void prepareInterleavedBuffer() {
@@ -102,6 +83,20 @@ void prepareInterleavedBuffer() {
     GL_CALL(glGenBuffers(1, &vbo));
     GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
     GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+
+    GLuint vao = 0;
+    GL_CALL(glGenVertexArrays(1, &vao));
+    GL_CALL(glBindVertexArray(vao));
+
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);  //  已绑定
+
+    GL_CALL(glEnableVertexAttribArray(0));
+    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
+
+    GL_CALL(glEnableVertexAttribArray(1));
+    GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
+
+    GL_CALL(glBindVertexArray(0));
 }
 
 int main() {
