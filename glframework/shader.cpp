@@ -109,3 +109,13 @@ void Shader::setFloat(const std::string &name, float value) {
     GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
     GL_CALL(glUniform1f(location, value));
 }
+
+void Shader::setVector3(const std::string &name, float x, float y, float z) {
+    GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
+    GL_CALL(glUniform3f(location, x, y, z));
+}
+
+void Shader::setVector3(const std::string &name, float* values) {
+    GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
+    GL_CALL(glUniform3fv(location, 1, values));
+}

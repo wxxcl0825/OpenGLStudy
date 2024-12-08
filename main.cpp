@@ -187,7 +187,8 @@ void render() {
     // 绑定program(选择材质)
     shader->begin();
 
-    shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
+    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
+    // shader->setVector3("uColor", 0.3, 0.4, 0.5);
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
