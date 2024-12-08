@@ -11,8 +11,8 @@ public:
 
     void begin(); // 开始使用当前Shader
     void end(); // 结束使用当前Shader
-private:
-    GLuint mProgram{0};
 
+    GLuint mProgram{0};
+private:
     void checkShaderErrors(GLuint target, std::string type);  // 检查编译/链接错误
 };
