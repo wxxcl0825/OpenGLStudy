@@ -129,18 +129,27 @@ void prepareVAO() {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
         0.0f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
+    };
+
+    float colors[] = {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
     };
 
     unsigned int indices[] = {
         0, 1, 2,
-        2, 1, 3
     };
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    GLuint posVbo;
+    glGenBuffers(1, &posVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, posVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+
+    GLuint colorVbo;
+    glGenBuffers(1, &colorVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 
     GLuint ebo;
     glGenBuffers(1, &ebo);
@@ -151,29 +160,38 @@ void prepareVAO() {
     glBindVertexArray(vao);
 
     // 绑定vbo, ebo, 加入描述信息
-    glBindBuffer(GL_ARRAY_BUFFER, vbo); // 可以省略
+    glBindBuffer(GL_ARRAY_BUFFER, posVbo); // 可以省略
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);  // 该语句会寻找当前已绑定的vbo, 故只需在vbo绑定后即可(vbo绑定要在vao写入数据之前)
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorVbo);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0); 
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); // 不可省略, 要在vao绑定后才能把ebo绑给绑过的vao(ebo绑定要在vao绑定之后)
 
-    glBindVertexArray(0);
+    glBindVertexArray(0);   // 解绑VAO, 由于部分设置依赖于当前绑定的VAO, 防止VAO被篡改
 }
 
 void prepareShader() {
     const char* vertexShaderSource = 
         "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;\n" // layout (location = 0) 选择VAO对应条目; in 声明输入
+        "layout (location = 1) in vec3 aColor;\n"
+        "out vec3 color;\n"
         "void main()\n"
         "{\n"
         "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   color = aColor;\n"
         "}\0";
 
     const char* fragmentShaderSource = 
         "#version 330 core\n"
         "out vec4 FragColor;\n"
+        "in vec3 color;\n"
         "void main()\n"
         "{\n"
-        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "   FragColor = vec4(color, 1.0f);\n"   //  4D向量赋值
         "}\n\0";
 
     // 创建源代码(相当于新建代码文件)
@@ -237,7 +255,7 @@ void render() {
 
     // 发出绘制指令
     // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void *)(3 * sizeof(int)));
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 }
 
 int main() {
