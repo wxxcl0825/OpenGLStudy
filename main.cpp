@@ -5,6 +5,8 @@
 #include "wrapper/checkError.h"
 #include "application/Application.h"
 
+GLuint program, vao;
+
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
 }
@@ -84,7 +86,6 @@ void prepareInterleavedBuffer() {
     GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
     GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
 
-    GLuint vao = 0;
     GL_CALL(glGenVertexArrays(1, &vao));
     GL_CALL(glBindVertexArray(vao));
 
@@ -143,7 +144,6 @@ void prepareShader() {
     }
 
     // 创建一个Program(空壳)
-    GLuint program = 0;
     program = glCreateProgram();
 
     // 将编译结果放到壳子里
@@ -165,6 +165,21 @@ void prepareShader() {
     glDeleteShader(fragment);
 }
 
+void render() {
+    // 清理画布
+    GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+
+    // 渲染操作
+    // 绑定program(选择材质)
+    glUseProgram(program);
+
+    // 绑定vao(选择几何信息)
+    glBindVertexArray(vao);
+
+    // 发出绘制指令
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
 int main() {
     if (!app->init(800, 600))
         return -1;
@@ -181,11 +196,7 @@ int main() {
 
     // 执行窗体循环
     while (app->update()) {
-        // 清理画布
-        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
-
-        // 渲染操作
-
+        render();
     }
 
     app->destroy();
