@@ -124,6 +124,41 @@ void prepareVAOForGLTriangles() {
     glBindVertexArray(0);
 }
 
+void prepareVAO() {
+    float positions[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 1, 3
+    };
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // 绑定vbo, ebo, 加入描述信息
+    glBindBuffer(GL_ARRAY_BUFFER, vbo); // 可以省略
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);  // 该语句会寻找当前已绑定的vbo, 故只需在vbo绑定后即可(vbo绑定要在vao写入数据之前)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo); // 不可省略, 要在vao绑定后才能把ebo绑给绑过的vao(ebo绑定要在vao绑定之后)
+
+    glBindVertexArray(0);
+}
+
 void prepareShader() {
     const char* vertexShaderSource = 
         "#version 410 core\n"
@@ -201,7 +236,8 @@ void render() {
     glBindVertexArray(vao);
 
     // 发出绘制指令
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void *)(3 * sizeof(int)));
 }
 
 int main() {
@@ -216,7 +252,7 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
     prepareShader();
-    prepareVAOForGLTriangles();
+    prepareVAO();
 
     // 执行窗体循环
     while (app->update()) {
