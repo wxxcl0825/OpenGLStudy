@@ -99,6 +99,72 @@ void prepareInterleavedBuffer() {
     GL_CALL(glBindVertexArray(0));
 }
 
+void prepareShader() {
+    const char* vertexShaderSource = 
+        "#version 410 core\n"
+        "layout (location = 0) in vec3 aPos;\n" // layout (location = 0) 选择VAO对应条目; in 声明输入
+        "void main()\n"
+        "{\n"
+        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "}\0";
+
+    const char* fragmentShaderSource = 
+        "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}\n\0";
+
+    // 创建源代码(相当于新建代码文件)
+    GLuint vertex, fragment;
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+
+    // 输入Shader代码(相当于将代码输入文件)
+    glShaderSource(vertex, 1, &vertexShaderSource, NULL);   //  char**: char*数组, 仅一个字符串; 字符串自然结尾, 无需指定长度
+    glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
+
+    // 编译Shader代码
+    int success = 0;
+    char infoLog[1024];
+    glCompileShader(vertex);
+    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success); // 检查编译是否成功
+    if (!success) {
+        glGetShaderInfoLog(vertex, 1024, NULL, infoLog);
+        std::cout << "Error: SHADER COMPILE ERROR - VERTEX" << "\n" << infoLog << std::endl;
+    }
+
+    glCompileShader(fragment);
+    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success); // 检查编译是否成功
+    if (!success) {
+        glGetShaderInfoLog(fragment, 1024, NULL, infoLog);
+        std::cout << "Error: SHADER COMPILE ERROR - FRAGMENT" << "\n" << infoLog << std::endl;
+    }
+
+    // 创建一个Program(空壳)
+    GLuint program = 0;
+    program = glCreateProgram();
+
+    // 将编译结果放到壳子里
+    glAttachShader(program, vertex);
+    glAttachShader(program, fragment);
+
+    // 链接
+    glLinkProgram(program);
+
+    // 检查链接错误
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(program, 1024, NULL, infoLog);
+        std::cout << "Error: SHADER LINK ERROR" << "\n" << infoLog << std::endl;
+    }
+
+    // 清理两段源代码
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+}
+
 int main() {
     if (!app->init(800, 600))
         return -1;
@@ -110,6 +176,7 @@ int main() {
     glViewport(0, 0, 800, 600);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
+    prepareShader();
     prepareInterleavedBuffer();
 
     // 执行窗体循环
