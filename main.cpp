@@ -133,23 +133,27 @@ void prepareVAO() {
     float positions[] = {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
     };
 
     float colors[] = {
         1.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f,
     };
 
     float uvs[] = {
         0.0f, 0.0f,
         1.0f, 0.0f, 
-        0.5f, 1.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
     };
 
     unsigned int indices[] = {
         0, 1, 2,
+        2, 1, 3
     };
 
     GLuint posVbo, colorVbo, uvVbo;
@@ -227,7 +231,7 @@ void render() {
     // 绑定program(选择材质)
     shader->begin();
 
-    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
+    shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
     // shader->setVector3("uColor", 0.3, 0.4, 0.5);
     shader->setInt("sampler", 0);
 
@@ -236,7 +240,7 @@ void render() {
 
     // 发出绘制指令
     // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
     shader->end();
 }
