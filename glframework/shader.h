@@ -2,6 +2,9 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <string>
 
 class Shader {
@@ -16,6 +19,7 @@ public:
     void setVector3(const std::string &name, float x, float y, float z);
     void setVector3(const std::string &name, float* values);
     void setInt(const std::string &name, int value);
+    void setMatrix4x4(const std::string &name, glm::mat4 value);
 private:
     GLuint mProgram{0};
 

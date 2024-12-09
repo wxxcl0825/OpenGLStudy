@@ -18,6 +18,7 @@ Shader* shader = nullptr;
 // Texture* landTexture = nullptr;
 // Texture* noiseTexture = nullptr;
 Texture* texture = nullptr;
+glm::mat4 transform(1.0);
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -46,6 +47,30 @@ void onKey(int key, int action, int mods) {
     std::cout << "Key Pressed: " << key << std::endl;
     std::cout << "action: " << action << std::endl;
     std::cout << "mods: " << mods << std::endl;
+}
+
+void doRotationTransform() {
+    transform = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));  // 角度为float, 弧度
+}
+
+void doTranslationTransform() {
+    transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
+}
+
+void doScaleTransform() {
+    transform = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.0f));
+}
+
+void doTransform() {
+    glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0, 0.0, 1.0)); 
+    glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
+    transform = translateMat * rotateMat;   // 先旋转, 后平移
+}
+
+float angle = 0.0f;
+void doRotation() {
+    angle += 2.0f;
+    transform = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0, 0.0, 1.0)); 
 }
 
 void prepareSingleBuffer() {
@@ -140,27 +165,23 @@ void prepareVAO() {
     float positions[] = {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f,
     };
 
     float colors[] = {
         1.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, 0.5f,
     };
 
     float uvs[] = {
         0.0f, 0.0f,
         1.0f, 0.0f, 
-        0.0f, 1.0f,
-        1.0f, 1.0f,
+        0.5f, 1.0f,
     };
 
     unsigned int indices[] = {
         0, 1, 2,
-        2, 1, 3
     };
 
     GLuint posVbo, colorVbo, uvVbo;
@@ -221,58 +242,27 @@ void render() {
     // 绑定program(选择材质)
     shader->begin();
 
-    shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
+    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
     // shader->setVector3("uColor", 0.3, 0.4, 0.5);
     // shader->setInt("grassSampler", 0);
     // shader->setInt("landSampler", 1);
     // shader->setInt("noiseSampler", 2);
-    shader->setInt("Sampler", 0);
+    shader->setInt("sampler", 0);
     // shader->setFloat("width", texture->getWidth());
     // shader->setFloat("height", texture->getHeight());
+    shader->setMatrix4x4("transform", transform);
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
 
     // 发出绘制指令
     // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     
     shader->end();
 }
 
-int main() {
-
-    // 向量
-    glm::vec2 v0(0);
-    glm::vec3 v1(0);
-    glm::vec4 v2(0);
-
-    glm::vec4 vadd = v2 + glm::vec4(0);
-
-    auto mul = vadd * v2;   // 对应元素相乘
-    auto dotRes = glm::dot(vadd, v2);
-
-    glm::vec3 vt0, vt1;
-    auto crossRes = glm::cross(vt0, vt1);   // 仅支持3维
-
-    // 矩阵
-    glm::mat4 m0(1.0);  //  初始化为单位矩阵
-    glm::mat4 m1 = glm::identity<glm::mat4>();
-    glm::mat2 mm2(1.0);
-    glm::mat3 mm3(1.0);
-    glm::mat2x3 mm4(1.0);
-
-    std::cout << glm::to_string(mm4) << std::endl;
-
-    auto madd = m0 + m1;
-    auto mmulti = m0 * m1;
-    auto res = m0 * v2;
-
-    auto tranMat = glm::transpose(madd);
-
-    auto inverseMat = glm::inverse(madd);
-
-    
+int main() {    
     if (!app->init(800, 600))
         return -1;
 
@@ -290,6 +280,7 @@ int main() {
     // 执行窗体循环
     while (app->update()) {
         render();
+        doRotation();
     }
 
     app->destroy();
