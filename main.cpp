@@ -1,16 +1,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
 #include <iostream>
 
 #include "wrapper/checkError.h"
 #include "application/Application.h"
 #include "glframework/shader.h"
+#include "glframework/texture.h"
 
 GLuint vao;
-GLuint texture;
 Shader* shader = nullptr;
+Texture* texture = nullptr;
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -133,27 +132,23 @@ void prepareVAO() {
     float positions[] = {
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f,
     };
 
     float colors[] = {
         1.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, 0.5f,
     };
 
     float uvs[] = {
         0.0f, 0.0f,
         1.0f, 0.0f, 
-        0.0f, 1.0f,
-        1.0f, 1.0f,
+        0.5f, 1.0f,
     };
 
     unsigned int indices[] = {
         0, 1, 2,
-        2, 1, 3
     };
 
     GLuint posVbo, colorVbo, uvVbo;
@@ -200,27 +195,7 @@ void prepareShader() {
 }
 
 void prepareTexture() {
-    int width, height, channels;
-    
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("assets/textures/noir.png", &width, &height, &channels, STBI_rgb_alpha);
-
-    GL_CALL(glGenTextures(1, &texture));
-    GL_CALL(glActiveTexture(GL_TEXTURE0));   // 先激活纹理单元, 后续绑定纹理将绑定在对应的纹理单元上
-    // 一旦激活, 关不掉(不能使用glBindTexture(GL_TEXTURE_2D, 0), 否则将删掉当前纹理单元的纹理对象)
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
-
-    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)); // 传输时开辟显存
-
-    stbi_image_free(data);
-
-    // 设置纹理过滤方式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);   //  所需像素数 > 纹理像素数: linear过滤, 平滑图像
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  //  所需像素数 < 纹理像素数: nearest过滤, 增强变化
-
-    // 设置纹理包裹方式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // u 方向
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);   // v 方向
+    texture = new Texture("assets/textures/noir.png", 0);
 }
 
 void render() {
@@ -231,7 +206,7 @@ void render() {
     // 绑定program(选择材质)
     shader->begin();
 
-    shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
+    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
     // shader->setVector3("uColor", 0.3, 0.4, 0.5);
     shader->setInt("sampler", 0);
 
@@ -240,7 +215,7 @@ void render() {
 
     // 发出绘制指令
     // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     
     shader->end();
 }
@@ -266,5 +241,6 @@ int main() {
     }
 
     app->destroy();
+    delete texture;
     return 0;
 }
