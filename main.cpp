@@ -1,5 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
 #include "wrapper/checkError.h"
@@ -236,6 +241,38 @@ void render() {
 }
 
 int main() {
+
+    // 向量
+    glm::vec2 v0(0);
+    glm::vec3 v1(0);
+    glm::vec4 v2(0);
+
+    glm::vec4 vadd = v2 + glm::vec4(0);
+
+    auto mul = vadd * v2;   // 对应元素相乘
+    auto dotRes = glm::dot(vadd, v2);
+
+    glm::vec3 vt0, vt1;
+    auto crossRes = glm::cross(vt0, vt1);   // 仅支持3维
+
+    // 矩阵
+    glm::mat4 m0(1.0);  //  初始化为单位矩阵
+    glm::mat4 m1 = glm::identity<glm::mat4>();
+    glm::mat2 mm2(1.0);
+    glm::mat3 mm3(1.0);
+    glm::mat2x3 mm4(1.0);
+
+    std::cout << glm::to_string(mm4) << std::endl;
+
+    auto madd = m0 + m1;
+    auto mmulti = m0 * m1;
+    auto res = m0 * v2;
+
+    auto tranMat = glm::transpose(madd);
+
+    auto inverseMat = glm::inverse(madd);
+
+    
     if (!app->init(800, 600))
         return -1;
 
