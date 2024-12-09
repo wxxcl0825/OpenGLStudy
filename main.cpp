@@ -19,6 +19,7 @@ Shader* shader = nullptr;
 // Texture* noiseTexture = nullptr;
 Texture* texture = nullptr;
 glm::mat4 transform(1.0);
+glm::mat4 viewMatrix(1.0f);
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -238,6 +239,10 @@ void prepareTexture() {
     texture = new Texture("assets/textures/noir.png", 0);
 }
 
+void prepareCamera() {
+    viewMatrix = glm::lookAt(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
 void render() {
     // 清理画布
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
@@ -255,6 +260,7 @@ void render() {
     // shader->setFloat("width", texture->getWidth());
     // shader->setFloat("height", texture->getHeight());
     shader->setMatrix4x4("transform", transform);
+    shader->setMatrix4x4("viewMatrix", viewMatrix);
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
@@ -280,11 +286,12 @@ int main() {
     prepareShader();
     prepareVAO();
     prepareTexture();
+    prepareCamera();
 
     // 执行窗体循环
     while (app->update()) {
         render();
-        doTransform();
+        // doTransform();
     }
 
     app->destroy();
