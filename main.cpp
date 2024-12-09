@@ -62,9 +62,13 @@ void doScaleTransform() {
 }
 
 void doTransform() {
-    glm::mat4 rotateMat = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0, 0.0, 1.0)); 
-    glm::mat4 translateMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
-    transform = translateMat * rotateMat;   // 先旋转, 后平移
+    float angle = 1.0f;
+    /* 
+        glm叠加变换相对于本地坐标系
+        1. 旋转变换: 相对于图形中心
+        2. 移动变换: 相对于缩放大小
+    */
+    transform = glm::rotate(transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 float angle = 0.0f;
@@ -280,7 +284,7 @@ int main() {
     // 执行窗体循环
     while (app->update()) {
         render();
-        doRotation();
+        doTransform();
     }
 
     app->destroy();
