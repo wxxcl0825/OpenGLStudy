@@ -20,6 +20,8 @@ Shader* shader = nullptr;
 Texture* texture = nullptr;
 glm::mat4 transform(1.0);
 glm::mat4 viewMatrix(1.0f);
+glm::mat4 orthoMatrix(1.0f);
+glm::mat4 perspectiveMatrix(1.0f);
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -168,9 +170,9 @@ void prepareVAOForGLTriangles() {
 
 void prepareVAO() {
     float positions[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        -1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
     };
 
     float colors[] = {
@@ -240,7 +242,20 @@ void prepareTexture() {
 }
 
 void prepareCamera() {
-    viewMatrix = glm::lookAt(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    viewMatrix = glm::lookAt(glm::vec3(3.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+void prepareOrtho() {
+    // 摄像机坐标系下
+    orthoMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 2.0f, -2.0f);    // z为和原点的距离, 并不是坐标(能看到的z < 0)
+    // 正交投影矩阵投影后变为左手系(z轴朝内, 眼前物体z > 0)
+}
+
+void preparePerspective() {
+    // fovy: 视张角(在y轴方向上展开)
+    // aspect: 近平面的横纵比
+    // near: 近平面距离(位于-z轴)   因为相机在z > 0处, 故可见物体z < 0
+    perspectiveMatrix = glm::perspective(glm::radians(60.0f), (float)app->getWidth() / (float)app->getHeight(), 0.1f, 1000.0f);
 }
 
 void render() {
@@ -261,6 +276,7 @@ void render() {
     // shader->setFloat("height", texture->getHeight());
     shader->setMatrix4x4("transform", transform);
     shader->setMatrix4x4("viewMatrix", viewMatrix);
+    shader->setMatrix4x4("projectionMatrix", perspectiveMatrix);
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
@@ -287,6 +303,7 @@ int main() {
     prepareVAO();
     prepareTexture();
     prepareCamera();
+    preparePerspective();
 
     // 执行窗体循环
     while (app->update()) {
