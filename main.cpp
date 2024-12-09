@@ -222,8 +222,8 @@ void render() {
     // shader->setInt("landSampler", 1);
     // shader->setInt("noiseSampler", 2);
     shader->setInt("Sampler", 0);
-    shader->setFloat("width", texture->getWidth());
-    shader->setFloat("height", texture->getHeight());
+    // shader->setFloat("width", texture->getWidth());
+    // shader->setFloat("height", texture->getHeight());
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
