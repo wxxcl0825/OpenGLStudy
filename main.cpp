@@ -9,9 +9,10 @@
 
 GLuint vao;
 Shader* shader = nullptr;
-Texture* grassTexture = nullptr;
-Texture* landTexture = nullptr;
-Texture* noiseTexture = nullptr;
+// Texture* grassTexture = nullptr;
+// Texture* landTexture = nullptr;
+// Texture* noiseTexture = nullptr;
+Texture* texture = nullptr;
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -201,9 +202,10 @@ void prepareShader() {
 }
 
 void prepareTexture() {
-    grassTexture = new Texture("assets/textures/grass.jpg", 0);
-    landTexture = new Texture("assets/textures/land.jpg", 1);
-    noiseTexture = new Texture("assets/textures/noise.png", 2);
+    // grassTexture = new Texture("assets/textures/grass.jpg", 0);
+    // landTexture = new Texture("assets/textures/land.jpg", 1);
+    // noiseTexture = new Texture("assets/textures/noise.png", 2);
+    texture = new Texture("assets/textures/noir.png", 0);
 }
 
 void render() {
@@ -214,11 +216,14 @@ void render() {
     // 绑定program(选择材质)
     shader->begin();
 
-    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
+    shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
     // shader->setVector3("uColor", 0.3, 0.4, 0.5);
-    shader->setInt("grassSampler", 0);
-    shader->setInt("landSampler", 1);
-    shader->setInt("noiseSampler", 2);
+    // shader->setInt("grassSampler", 0);
+    // shader->setInt("landSampler", 1);
+    // shader->setInt("noiseSampler", 2);
+    shader->setInt("Sampler", 0);
+    shader->setFloat("width", texture->getWidth());
+    shader->setFloat("height", texture->getHeight());
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
@@ -251,7 +256,8 @@ int main() {
     }
 
     app->destroy();
-    delete grassTexture;
-    delete landTexture;
+    // delete grassTexture;
+    // delete landTexture;
+    delete texture;
     return 0;
 }

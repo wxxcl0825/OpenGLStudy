@@ -10,6 +10,8 @@ public:
     ~Texture();
 
     void bind();
+    int getWidth() const { return mWidth; }
+    int getHeight() const { return mHeight; }
 
 private:
     GLuint mTexture{0};
