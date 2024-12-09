@@ -15,6 +15,7 @@ public:
     void setFloat(const std::string &name, float value);
     void setVector3(const std::string &name, float x, float y, float z);
     void setVector3(const std::string &name, float* values);
+    void setInt(const std::string &name, int value);
 private:
     GLuint mProgram{0};
 
