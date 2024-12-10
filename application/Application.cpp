@@ -45,8 +45,10 @@ bool Application::init(const int& width, const int& height) {
     // 设置监听
     // GLFW的回调函数需要一个静态函数或全局函数的指针; 若为成员函数的指针, 由于成员函数会访问非静态成员对象, 从而需隐式包含成员指针
     // 不是找不到指针, 而是指针需要提供一个this, 需要具体的成员
-    glfwSetFramebufferSizeCallback(mWindow, frameBufferSizeCallBack);
-    glfwSetKeyCallback(mWindow, keyCallBack);
+    glfwSetFramebufferSizeCallback(mWindow, frameBufferSizeCallback);
+    glfwSetKeyCallback(mWindow, keyCallback);
+    glfwSetMouseButtonCallback(mWindow, mouseCallback);
+    glfwSetCursorPosCallback(mWindow, cursorCallback);
 
     glfwSetWindowUserPointer(mWindow, this);    // 将this存到Window里
 
@@ -70,7 +72,7 @@ void Application::destroy() {
     glfwTerminate();
 }
 
-void Application::frameBufferSizeCallBack(GLFWwindow* window, int width, int height) {
+void Application::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
     Application* self = (Application*)glfwGetWindowUserPointer(window);
     if (self->mResizeCallback != nullptr)
         self->mResizeCallback(width, height);
@@ -79,8 +81,30 @@ void Application::frameBufferSizeCallBack(GLFWwindow* window, int width, int hei
     //     Application::getInstance()->mResizeCallback(width, height);
 }
 
-void Application::keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void Application::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Application* self = (Application*)glfwGetWindowUserPointer(window);
-    if (self->mKeyBoardCallBack != nullptr)
-        self->mKeyBoardCallBack(key, action, mods);
+    if (self->mKeyBoardCallback != nullptr)
+        self->mKeyBoardCallback(key, action, mods);
+}
+
+void Application::mouseCallback(GLFWwindow* window, int button, int action, int mods) {
+    Application* self = (Application*)glfwGetWindowUserPointer(window);
+    if (self->mMouseCallback != nullptr)
+        self->mMouseCallback(button, action, mods);
+}
+
+void Application::cursorCallback(GLFWwindow* window, double xpos, double ypos) {
+    Application* self = (Application*)glfwGetWindowUserPointer(window);
+    if (self->mCursorCallback != nullptr)
+        self->mCursorCallback(xpos, ypos);
+}
+
+void Application::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    Application* self = (Application*)glfwGetWindowUserPointer(window);
+    if (self->mScrollCallback != nullptr)
+        self->mScrollCallback(yoffset);
+}
+
+void Application::getCursorPosition(double *x, double *y) {
+    glfwGetCursorPos(mWindow, x, y);
 }

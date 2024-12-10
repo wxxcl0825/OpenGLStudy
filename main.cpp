@@ -1,16 +1,18 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
+#include "glframework/core.h"
 #include "wrapper/checkError.h"
 #include "application/Application.h"
 #include "glframework/shader.h"
 #include "glframework/texture.h"
+
+#include "application/camera/camera.h"
+#include "application/camera/orthographicCamera.h"
+#include "application/camera/perspectiveCamera.h"
+
+#include "application/camera/cameraControl.h"
+#include "application/camera/gameCameraControl.h"
+#include "application/camera/trackBallCameraControl.h"
 
 GLuint vao;
 Shader* shader = nullptr;
@@ -23,33 +25,31 @@ glm::mat4 viewMatrix(1.0f);
 glm::mat4 orthoMatrix(1.0f);
 glm::mat4 perspectiveMatrix(1.0f);
 
+PerspectiveCamera* camera = nullptr;
+// OrthographicCamera* camera = nullptr;
+// TrackBallCameraControl* cameraControl = nullptr;
+GameCameraControl* cameraControl = nullptr;
+
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
 }
 
 void onKey(int key, int action, int mods) {
-    // if (key == GLFW_KEY_W) {
+    cameraControl->onKey(key, action, mods);
+}
 
-    // }
+void onMouse(int button, int action, int mods) {
+    double x = 0, y = 0;
+    app->getCursorPosition(&x, &y);
+    cameraControl->onMouse(button, action, x, y);
+}
 
-    // if (action == GLFW_PRESS) {
+void onCursor(double xpos, double ypos) {
+    cameraControl->onCursor(xpos, ypos);
+}
 
-    // }
-
-    // if (action == GLFW_RELEASE) {
-
-    // }
-
-    // if (mods == GLFW_MOD_CONTROL) {
-
-    // }
-
-    // if (mods == GLFW_MOD_SHIFT) {
-
-    // }
-    std::cout << "Key Pressed: " << key << std::endl;
-    std::cout << "action: " << action << std::endl;
-    std::cout << "mods: " << mods << std::endl;
+void onScroll(double offset) {
+    cameraControl->onScroll(offset);
 }
 
 void doRotationTransform() {
@@ -242,20 +242,11 @@ void prepareTexture() {
 }
 
 void prepareCamera() {
-    viewMatrix = glm::lookAt(glm::vec3(3.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-}
-
-void prepareOrtho() {
-    // 摄像机坐标系下
-    orthoMatrix = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 2.0f, -2.0f);    // z为和原点的距离, 并不是坐标(能看到的z < 0)
-    // 正交投影矩阵投影后变为左手系(z轴朝内, 眼前物体z > 0)
-}
-
-void preparePerspective() {
-    // fovy: 视张角(在y轴方向上展开)
-    // aspect: 近平面的横纵比
-    // near: 近平面距离(位于-z轴)   因为相机在z > 0处, 故可见物体z < 0
-    perspectiveMatrix = glm::perspective(glm::radians(60.0f), (float)app->getWidth() / (float)app->getHeight(), 0.1f, 1000.0f);
+    camera = new PerspectiveCamera(60.0f, (float)(app->getWidth()) / (float)(app->getHeight()), 0.1f, 1000.0f);
+    // cameraControl = new TrackBallCameraControl();
+    cameraControl = new GameCameraControl();
+    cameraControl->setCamera(camera);
+    cameraControl->setSensitivity(0.2f);
 }
 
 void render() {
@@ -275,8 +266,8 @@ void render() {
     // shader->setFloat("width", texture->getWidth());
     // shader->setFloat("height", texture->getHeight());
     shader->setMatrix4x4("transform", transform);
-    shader->setMatrix4x4("viewMatrix", viewMatrix);
-    shader->setMatrix4x4("projectionMatrix", perspectiveMatrix);
+    shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
+    shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(vao);
@@ -293,7 +284,10 @@ int main() {
         return -1;
 
     app->setResizeCallback(OnResize);
-    app->setKeyBoardCallBack(onKey);
+    app->setKeyBoardCallback(onKey);
+    app->setMouseCallback(onMouse);
+    app->setCursorCallback(onCursor);
+    app->setScrollCallback(onScroll);
 
     // 设置openGL视口并清理颜色
     glViewport(0, 0, 800, 600);
@@ -303,10 +297,10 @@ int main() {
     prepareVAO();
     prepareTexture();
     prepareCamera();
-    preparePerspective();
 
     // 执行窗体循环
     while (app->update()) {
+        cameraControl->update();
         render();
         // doTransform();
     }

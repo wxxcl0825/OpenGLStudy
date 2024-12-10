@@ -8,6 +8,9 @@
 
 using ResizeCallback = void(*)(int width, int height);
 using KeyBoardCallback = void(*)(int key, int action, int mods);
+using MouseCallback = void(*)(int button, int action, int mods);
+using CursorCallback = void(*)(double xpos, double ypos);
+using ScrollCallback = void(*)(double offset);
 
 // 表示当前应用程序本身
 
@@ -33,8 +36,13 @@ public:
   uint32_t getWidth() const { return mWidth; };
   uint32_t getHeight() const { return mHeight; };
 
+  void getCursorPosition(double *x, double *y);
+
   void setResizeCallback(ResizeCallback callback) { mResizeCallback = callback; };
-  void setKeyBoardCallBack(KeyBoardCallback callback) { mKeyBoardCallBack = callback; }
+  void setKeyBoardCallback(KeyBoardCallback callback) { mKeyBoardCallback = callback; }
+  void setMouseCallback(MouseCallback callback) { mMouseCallback = callback; }
+  void setCursorCallback(CursorCallback callback) { mCursorCallback = callback; }
+  void setScrollCallback(ScrollCallback callback) { mScrollCallback = callback; }
 
 private:
   static Application *mInstance; // 全局唯一的静态实例
@@ -44,10 +52,16 @@ private:
   GLFWwindow *mWindow{nullptr};
 
   ResizeCallback mResizeCallback{nullptr};
-  KeyBoardCallback mKeyBoardCallBack{nullptr};
+  KeyBoardCallback mKeyBoardCallback{nullptr};
+  MouseCallback mMouseCallback{nullptr};
+  CursorCallback mCursorCallback{nullptr};
+  ScrollCallback mScrollCallback{nullptr};
 
   Application();                 // 私有构造函数, 防止外界new出实例
 
-  static void frameBufferSizeCallBack(GLFWwindow* window, int width, int height);
-  static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
+  static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
+  static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+  static void mouseCallback(GLFWwindow* window, int button, int action, int mods);
+  static void cursorCallback(GLFWwindow* window, double xpos, double ypos);
+  static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 };
