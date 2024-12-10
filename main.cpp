@@ -249,14 +249,23 @@ void prepareCamera() {
     cameraControl->setSensitivity(0.2f);
 }
 
+void prepareState() {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    // glDepthFunc(GL_GREATER);
+    // glClearDepth(0.0f);
+}
+
 void render() {
     // 清理画布
-    GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+    GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     // 渲染操作
     // 绑定program(选择材质)
     shader->begin();
 
+    // 切换贴图, 切换Shader Uniform变量, 切换vao, 绘制
+    texture->bind();
     // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
     // shader->setVector3("uColor", 0.3, 0.4, 0.5);
     // shader->setInt("grassSampler", 0);
@@ -297,6 +306,7 @@ int main() {
     prepareVAO();
     prepareTexture();
     prepareCamera();
+    prepareState();
 
     // 执行窗体循环
     while (app->update()) {
