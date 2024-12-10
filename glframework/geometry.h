@@ -8,7 +8,7 @@ public:
     ~Geometry();
 
     static Geometry* createBox(float size);
-    static Geometry* createSphere(float size);
+    static Geometry* createSphere(float radius);
 
     GLuint getVao() const { return mVao; }
     uint32_t getIndicesCount() const { return mIndicesCount; }

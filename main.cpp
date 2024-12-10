@@ -84,7 +84,7 @@ void doRotation() {
 }
 
 void prepareVAO() {
-    geometry = Geometry::createBox(6.0f);
+    geometry = Geometry::createSphere(6.0f);
 }
 
 void prepareShader() {
