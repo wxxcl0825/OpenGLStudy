@@ -6,15 +6,17 @@ layout(location = 2) in vec3 aNormal;
 
 out vec2 uv;
 out vec3 normal;
+out vec3 worldPosition;
 
-uniform mat4 transform;
+uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 void main() {
-  vec4 position = vec4(aPos, 1.0);
-  position = projectionMatrix * viewMatrix * transform * position; // 最终转换到相机坐标系
-  gl_Position = position;
+  vec4 transformPosition = vec4(aPos, 1.0); // 转化为齐次坐标
+  transformPosition = modelMatrix * transformPosition;
+  worldPosition = transformPosition.xyz;  // 世界坐标系
+  gl_Position = projectionMatrix * viewMatrix * transformPosition; // 最终转换到相机坐标系
   uv = aUV;
   normal = aNormal;
 }

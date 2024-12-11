@@ -34,8 +34,11 @@ GameCameraControl* cameraControl = nullptr;
 Geometry* geometry = nullptr;
 
 // 平行光: 光线方向 + 强度(由颜色表示)
-glm::vec3 lightDirection = glm::vec3(-0.4f, -1.4f, -1.9f);
-glm::vec3 lightColor = glm::vec3(0.9f, 0.85f, 0.75f);
+glm::vec3 lightDirection = glm::vec3(-1.0f, 0.0f, -1.0f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+// 高光反射强度(高光亮度)
+float specularIntensity = 0.5f;
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -135,14 +138,16 @@ void render() {
     shader->setInt("sampler", 0);
     // shader->setFloat("width", texture->getWidth());
     // shader->setFloat("height", texture->getHeight());
-    shader->setMatrix4x4("transform", transform);
+    shader->setMatrix4x4("modelMatrix", transform);
     shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
     shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
 
     // 光源相关参数
     shader->setVector3("lightDirection", lightDirection);
     shader->setVector3("lightColor", lightColor);
+    shader->setFloat("specularIntensity", specularIntensity);
 
+    shader->setVector3("cameraPosition", camera->mPosition);
     // 绑定vao(选择几何信息)
     glBindVertexArray(geometry->getVao());
 
