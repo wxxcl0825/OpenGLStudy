@@ -15,6 +15,10 @@
 #include "application/camera/gameCameraControl.h"
 #include "application/camera/trackBallCameraControl.h"
 
+#include "glframework/material/material.h"
+#include "glframework/material/phongMaterial.h"
+#include "glframework/mesh.h"
+
 // GLuint vao;
 Shader* shader = nullptr;
 // Texture* grassTexture = nullptr;
@@ -63,49 +67,6 @@ void onScroll(double offset) {
     cameraControl->onScroll(offset);
 }
 
-void doRotationTransform() {
-    transform = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));  // 角度为float, 弧度
-}
-
-void doTranslationTransform() {
-    transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
-}
-
-void doScaleTransform() {
-    transform = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.0f));
-}
-
-void doTransform() {
-    float angle = 1.0f;
-    /* 
-        glm叠加变换相对于本地坐标系
-        1. 旋转变换: 相对于图形中心
-        2. 移动变换: 相对于缩放大小
-    */
-    transform = glm::rotate(transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
-}
-
-float angle = 0.0f;
-void doRotation() {
-    angle += 2.0f;
-    transform = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0, 0.0, 1.0)); 
-}
-
-void prepareVAO() {
-    geometry = Geometry::createSphere(3.0f);
-}
-
-void prepareShader() {
-    shader = new Shader("assets/shaders/vertex.vert", "assets/shaders/fragment.frag");
-}
-
-void prepareTexture() {
-    // grassTexture = new Texture("assets/textures/grass.jpg", 0);
-    // landTexture = new Texture("assets/textures/land.jpg", 1);
-    // noiseTexture = new Texture("assets/textures/noise.png", 2);
-    texture = new Texture("assets/textures/noir.png", 0);
-}
-
 void prepareCamera() {
     camera = new PerspectiveCamera(60.0f, (float)(app->getWidth()) / (float)(app->getHeight()), 0.1f, 1000.0f);
     // cameraControl = new TrackBallCameraControl();
@@ -114,11 +75,14 @@ void prepareCamera() {
     cameraControl->setSensitivity(0.2f);
 }
 
-void prepareState() {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    // glDepthFunc(GL_GREATER);
-    // glClearDepth(0.0f);
+void prepare() {
+    auto geometry = Geometry::createSphere(3.0f);
+
+    auto material = new PhongMaterial();
+    material->mShiness = 32.0f;
+    material->mDiffuse = new Texture("assets/textures/noir.png", 0);
+
+    auto mesh = new Mesh(geometry, material);
 }
 
 void render() {
@@ -180,17 +144,13 @@ int main() {
     glViewport(0, 0, 800, 600);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
-    prepareShader();
-    prepareVAO();
-    prepareTexture();
+    prepare();
     prepareCamera();
-    prepareState();
 
     // 执行窗体循环
     while (app->update()) {
         cameraControl->update();
         render();
-        doTransform();
     }
 
     app->destroy();
