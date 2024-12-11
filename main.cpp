@@ -33,6 +33,10 @@ GameCameraControl* cameraControl = nullptr;
 
 Geometry* geometry = nullptr;
 
+// 平行光: 光线方向 + 强度(由颜色表示)
+glm::vec3 lightDirection = glm::vec3(-0.4f, -1.4f, -1.9f);
+glm::vec3 lightColor = glm::vec3(0.9f, 0.85f, 0.75f);
+
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
 }
@@ -84,7 +88,7 @@ void doRotation() {
 }
 
 void prepareVAO() {
-    geometry = Geometry::createSphere(6.0f);
+    geometry = Geometry::createBox(3.0f);
 }
 
 void prepareShader() {
@@ -134,6 +138,10 @@ void render() {
     shader->setMatrix4x4("transform", transform);
     shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
     shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
+
+    // 光源相关参数
+    shader->setVector3("lightDirection", lightDirection);
+    shader->setVector3("lightColor", lightColor);
 
     // 绑定vao(选择几何信息)
     glBindVertexArray(geometry->getVao());

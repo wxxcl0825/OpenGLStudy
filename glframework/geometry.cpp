@@ -13,6 +13,8 @@ Geometry::~Geometry() {
         glDeleteBuffers(1, &mPosVbo);
     if (mUvVbo != 0)
         glDeleteBuffers(1, &mUvVbo);
+    if (mNormalVbo != 0)
+        glDeleteBuffers(1, &mNormalVbo);
     if (mEbo != 0)
         glDeleteBuffers(1, &mEbo);
 }
@@ -88,6 +90,44 @@ Geometry* Geometry::createBox(float size) {
         0.0f, 1.0f
     };
 
+	float normals[] = {
+		//Front face
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+
+		//Back face
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+		0.0f, 0.0f, -1.0f,
+
+		//Top face
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+
+		//Bottom face
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f,
+
+		//Right face
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+
+		//Left face
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+	};
+
     unsigned int indices[] = {
         0, 1, 2, 2, 3, 0, // front face
         4, 5, 6, 6, 7, 4, // back face
@@ -97,7 +137,7 @@ Geometry* Geometry::createBox(float size) {
         20, 21, 22, 22, 23, 20  // bottom face
     };
 
-    GLuint& posVbo = geometry->mPosVbo, uvVbo = geometry->mUvVbo;
+    GLuint& posVbo = geometry->mPosVbo, uvVbo = geometry->mUvVbo, normalVbo = geometry->mNormalVbo;
     glGenBuffers(1, &posVbo);
     glBindBuffer(GL_ARRAY_BUFFER, posVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
@@ -105,6 +145,10 @@ Geometry* Geometry::createBox(float size) {
     glGenBuffers(1, &uvVbo);
     glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &normalVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
 
     glGenBuffers(1, &geometry->mEbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
@@ -121,6 +165,10 @@ Geometry* Geometry::createBox(float size) {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
+    glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
 
     glBindVertexArray(0);
@@ -133,6 +181,7 @@ Geometry* Geometry::createSphere(float radius) {
     std::vector<GLfloat> positions{};
     std::vector<GLfloat> uvs{};
     std::vector<GLuint> indices{};
+    std::vector<GLfloat> normals{};
 
     int numLatLines = 60;
     int numLongLines = 60;
@@ -156,6 +205,11 @@ Geometry* Geometry::createSphere(float radius) {
 
             uvs.push_back(u);
             uvs.push_back(v);
+
+            // 未归一化, 在shader中归一化
+            normals.push_back(x);
+            normals.push_back(y);
+            normals.push_back(z);
         }
 
     // indices
@@ -174,7 +228,7 @@ Geometry* Geometry::createSphere(float radius) {
             indices.push_back(p4);
         }
         
-    GLuint& posVbo = geometry->mPosVbo, uvVbo = geometry->mUvVbo;
+    GLuint& posVbo = geometry->mPosVbo, uvVbo = geometry->mUvVbo, normalVbo = geometry->mNormalVbo;
     glGenBuffers(1, &posVbo);
     glBindBuffer(GL_ARRAY_BUFFER, posVbo);
     glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
@@ -182,6 +236,10 @@ Geometry* Geometry::createSphere(float radius) {
     glGenBuffers(1, &uvVbo);
     glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
     glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &normalVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &geometry->mEbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
@@ -198,10 +256,88 @@ Geometry* Geometry::createSphere(float radius) {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
+    glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
 
     glBindVertexArray(0);
 
     geometry->mIndicesCount = indices.size();
     return geometry;
+}
+
+Geometry* Geometry::createPlane(float width, float height) {
+	Geometry* geometry = new Geometry();
+	geometry->mIndicesCount = 6;
+
+	float halfW = width / 2.0f;
+	float halfH = height / 2.0f;
+
+	float positions[] = {
+		-halfW, -halfH, 0.0f,
+		halfW, -halfH, 0.0f,
+		halfW, halfH, 0.0f,
+		-halfW, halfH, 0.0f,
+	};
+
+	float uvs[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f
+	};
+
+	float normals[] = {
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f,
+	};
+
+	unsigned int indices[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+
+	GLuint& posVbo = geometry->mPosVbo, &uvVbo = geometry->mUvVbo, &normalVbo = geometry->mNormalVbo;
+	glGenBuffers(1, &posVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &uvVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &normalVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &geometry->mEbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	
+	glGenVertexArrays(1, &geometry->mVao);
+	glBindVertexArray(geometry->mVao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, uvVbo);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
+
+	glBindVertexArray(0);
+
+	return geometry;
 }
