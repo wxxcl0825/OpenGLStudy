@@ -103,6 +103,18 @@ Geometry* Geometry::createBox(float size) {
 		0.0f, 0.0f, -1.0f,
 		0.0f, 0.0f, -1.0f,
 
+        //Left face
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+		-1.0f, 0.0f, 0.0f,
+
+        //Right face
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+
 		//Top face
 		0.0f, 1.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
@@ -114,18 +126,6 @@ Geometry* Geometry::createBox(float size) {
 		0.0f, -1.0f, 0.0f,
 		0.0f, -1.0f, 0.0f,
 		0.0f, -1.0f, 0.0f,
-
-		//Right face
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-
-		//Left face
-		-1.0f, 0.0f, 0.0f,
-		-1.0f, 0.0f, 0.0f,
-		-1.0f, 0.0f, 0.0f,
-		-1.0f, 0.0f, 0.0f,
 	};
 
     unsigned int indices[] = {
@@ -167,7 +167,7 @@ Geometry* Geometry::createBox(float size) {
 
     glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
 
@@ -258,7 +258,7 @@ Geometry* Geometry::createSphere(float radius) {
 
     glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
 
