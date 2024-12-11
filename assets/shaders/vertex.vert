@@ -11,6 +11,7 @@ out vec3 worldPosition;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
 
 void main() {
   vec4 transformPosition = vec4(aPos, 1.0); // 转化为齐次坐标
@@ -18,5 +19,6 @@ void main() {
   worldPosition = transformPosition.xyz;  // 世界坐标系
   gl_Position = projectionMatrix * viewMatrix * transformPosition; // 最终转换到相机坐标系
   uv = aUV;
-  normal = aNormal;
+  // normal = transpose(inverse(mat3(modelMatrix))) * aNormal; // 法线需跟着变(CPU端算完再下放, 节约GPU资源)
+  normal = normalMatrix * aNormal;
 }
