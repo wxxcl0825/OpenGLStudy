@@ -239,7 +239,7 @@ Geometry* Geometry::createSphere(float radius) {
 
     glGenBuffers(1, &normalVbo);
 	glBindBuffer(GL_ARRAY_BUFFER, normalVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &geometry->mEbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry->mEbo);
