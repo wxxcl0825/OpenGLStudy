@@ -36,6 +36,7 @@ Geometry* geometry = nullptr;
 // 平行光: 光线方向 + 强度(由颜色表示)
 glm::vec3 lightDirection = glm::vec3(-1.0f, 0.0f, -1.0f);
 glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 ambientColor = glm::vec3(0.1f);
 
 // 高光反射强度(高光亮度)
 float specularIntensity = 0.5f;
@@ -146,6 +147,7 @@ void render() {
     shader->setVector3("lightDirection", lightDirection);
     shader->setVector3("lightColor", lightColor);
     shader->setFloat("specularIntensity", specularIntensity);
+    shader->setVector3("ambientColor", ambientColor);
 
     shader->setVector3("cameraPosition", camera->mPosition);
     // 绑定vao(选择几何信息)

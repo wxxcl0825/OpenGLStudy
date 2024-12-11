@@ -12,6 +12,7 @@ uniform sampler2D sampler;
 uniform vec3 lightDirection;
 uniform vec3 lightColor;
 uniform float specularIntensity;
+uniform vec3 ambientColor;
 
 // 相机世界位置
 uniform vec3 cameraPosition;
@@ -40,7 +41,10 @@ void main() {
     // 高光反射强度控制 specularIntensity
     vec3 specularColor = lightColor * specular * flag * specularIntensity; // 反射光直接反射, 并不是物体吸收后反射, 与物体颜色无关
 
-    vec3 finalColor = diffuseColor + specularColor; // 漫反射叠加镜面反射
+    // 环境光
+    vec3 ambientColor = objectColor * ambientColor; // 直接照亮
+
+    vec3 finalColor = diffuseColor + specularColor + ambientColor; // 漫反射叠加镜面反射
     
     FragColor = vec4(finalColor, 1.0);
 }
