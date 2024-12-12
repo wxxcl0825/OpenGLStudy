@@ -7,6 +7,7 @@
 #include "../light/spotLight.h"
 #include "../../application/camera/camera.h"
 #include "../shader.h"
+#include "../scene.h"
 
 
 #include <vector>
@@ -18,10 +19,12 @@ public:
 
     // 调用后渲染一帧
     void render(
-        const std::vector<Mesh*>& meshes,
+        Scene* scene,
         Camera* camera,
-        const std::vector<SpotLight*>& spotLights,
+        DirectionalLight* dirLight,
         AmbientLight* ambLight);
+
+    void renderObject(Object* object, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight); // 渲染一个物体(及其子节点)
 
     void setClearColor(glm::vec3 color);
 

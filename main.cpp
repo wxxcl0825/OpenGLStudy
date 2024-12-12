@@ -32,12 +32,11 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 Renderer* renderer = nullptr;
+Scene* scene = nullptr;
 Camera* camera = nullptr;
 CameraControl* cameraControl = nullptr;
 
-std::vector<Mesh*> meshes{};
-// SpotLight* spotLight = nullptr;
-std::vector<SpotLight*> spotLights{};
+DirectionalLight* dirLight = nullptr;
 AmbientLight* ambLight = nullptr;
 
 glm::vec3 clearColor{};
@@ -74,60 +73,28 @@ void prepareCamera() {
 
 void prepare() {
     renderer = new Renderer();
+    scene = new Scene();
     
-    auto geometry = Geometry::createBox(0.5f);
+    auto geometry = Geometry::createBox(1.0f);
+    auto spGeometry = Geometry::createSphere(1.0f);
 
     auto material = new PhongMaterial();
-    material->mShiness = 64.0f;
+    material->mShiness = 16.0f;
     material->mDiffuse = new Texture("assets/textures/box.png", 0);
     material->mSpecularMask = new Texture("assets/textures/sp_mask.png", 1);    // 将纹理贴图绑到1号单元
 
     auto mesh = new Mesh(geometry, material);
+    auto spMesh = new Mesh(spGeometry, material);
+    spMesh->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 
-    meshes.push_back(mesh);
+    mesh->addChild(spMesh);
+    scene->addChild(mesh);
 
-    auto geometryWhite = Geometry::createSphere(0.1f);
-    auto materialWhite = new WhiteMaterial();
-    auto meshWhite = new Mesh(geometryWhite, materialWhite);
-    meshWhite->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
-
-    meshes.push_back(meshWhite);
-
+    dirLight = new DirectionalLight();
+    dirLight->mDirection = glm::vec3(-1.0f);
+    
     ambLight = new AmbientLight();
     ambLight->mColor = glm::vec3(0.1f);
-
-    auto spotLight1 = new SpotLight();
-    spotLight1->setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
-    spotLight1->mTargetDirection = glm::vec3(-1.0f, 0.0f, 0.0f);
-    spotLight1->mInnerAngle = 30.0f;
-    spotLight1->mOuterAngle = 45.0f;
-    spotLight1->mColor = glm::vec3(1.0f, 0.0f, 0.0f);
-
-    auto spotLight2 = new SpotLight();
-    spotLight2->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
-    spotLight2->mTargetDirection = glm::vec3(0.0f, -1.0f, 0.0f);
-    spotLight2->mInnerAngle = 30.0f;
-    spotLight2->mOuterAngle = 45.0f;
-    spotLight2->mColor = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    auto spotLight3 = new SpotLight();
-    spotLight3->setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-    spotLight3->mTargetDirection = glm::vec3(0.0f, 1.0f, 0.0f);
-    spotLight3->mInnerAngle = 30.0f;
-    spotLight3->mOuterAngle = 45.0f;
-    spotLight3->mColor = glm::vec3(0.0f, 0.0f, 1.0f);
-
-    auto spotLight4 = new SpotLight();
-    spotLight4->setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
-    spotLight4->mTargetDirection = glm::vec3(0.0f, 0.0f, 1.0f);
-    spotLight4->mInnerAngle = 30.0f;
-    spotLight4->mOuterAngle = 45.0f;
-    spotLight4->mColor = glm::vec3(1.0f, 1.0f, 0.0f);
-
-    spotLights.push_back(spotLight1);
-    spotLights.push_back(spotLight2);
-    spotLights.push_back(spotLight3);
-    spotLights.push_back(spotLight4);
 }
 
 void initIMGUI() {
@@ -178,8 +145,8 @@ int main() {
     // 执行窗体循环
     while (app->update()) {
         cameraControl->update();
-        renderer->render(meshes, camera, spotLights, ambLight);
         renderer->setClearColor(clearColor);
+        renderer->render(scene, camera, dirLight, ambLight);
         renderIMGUI();
     }
 

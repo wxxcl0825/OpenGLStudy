@@ -13,14 +13,39 @@ Renderer::~Renderer() {
 
 }
 
-void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
-            const std::vector<SpotLight*>& spotLights, AmbientLight *ambLight) {
+void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto mesh: meshes) {
+    renderObject(scene, camera, dirLight, ambLight);
+}
+
+Shader* Renderer::pickShader(MaterialType type) {
+    Shader* result = nullptr;
+
+    switch (type) {
+        case MaterialType::PhongMaterial:
+            result = mPhongShader;
+            break;
+        case MaterialType::WhiteMaterial:
+            result = mWhiteShader;
+            break;
+        default:
+            break;
+    }
+
+    return result;
+}
+
+void Renderer::setClearColor(glm::vec3 color) {
+    glClearColor(color.r, color.g, color.b, 1.0f);
+}
+
+void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight) {
+    if (object->getType() == ObjectType::Mesh) {
+        auto mesh = (Mesh *) object;
         auto geometry = mesh->mGeometry;
         auto material = mesh->mMaterial;
 
@@ -47,21 +72,11 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
 
                 // 光源
-                for (int i = 0; i < spotLights.size(); i++) {
-                    auto spotLight = spotLights[i];
-                    std::string baseName = "spotLights[";
-                    baseName.append(std::to_string(i));
-                    baseName.append("]");
-
-                    shader->setVector3(baseName + ".position", spotLight->getPosition());
-                    shader->setVector3(baseName + ".color", spotLight->mColor);
-                    shader->setVector3(baseName + ".targetDirection", spotLight->mTargetDirection);
-                    shader->setFloat(baseName + ".innerLine", glm::cos(glm::radians(spotLight->mInnerAngle)));
-                    shader->setFloat(baseName + ".outerLine", glm::cos(glm::radians(spotLight->mOuterAngle)));
-                    shader->setFloat(baseName + ".specularIntensity", spotLight->mSpecularIntensity);
-                    shader->setVector3("ambientColor", ambLight->mColor);
-                    shader->setFloat("shiness", phongMat->mShiness);
-                }
+                shader->setVector3("directionalLight.direction", dirLight->mDirection);
+                shader->setVector3("directionalLight.color", dirLight->mColor);
+                shader->setFloat("directionalLight.specularIntensity", dirLight->mSpecularIntensity);
+                shader->setVector3("ambientColor", ambLight->mColor);
+                shader->setFloat("shiness", phongMat->mShiness);
 
                 // 相机
                 shader->setVector3("cameraPosition", camera->mPosition);
@@ -78,7 +93,7 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 }
                 break;
             default:
-                continue;
+                break;
         }
 
         glBindVertexArray(geometry->getVao());
@@ -86,25 +101,9 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
 
         shader->end();
     }
-}
 
-Shader* Renderer::pickShader(MaterialType type) {
-    Shader* result = nullptr;
-
-    switch (type) {
-        case MaterialType::PhongMaterial:
-            result = mPhongShader;
-            break;
-        case MaterialType::WhiteMaterial:
-            result = mWhiteShader;
-            break;
-        default:
-            break;
+    auto children = object->getChildren();
+    for (auto child: children) {
+        renderObject(child, camera, dirLight, ambLight);
     }
-
-    return result;
-}
-
-void Renderer::setClearColor(glm::vec3 color) {
-    glClearColor(color.r, color.g, color.b, 1.0f);
 }

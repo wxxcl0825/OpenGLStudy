@@ -1,7 +1,7 @@
 
 #version 410 core
 
-#define SPOT_LIGHT_NUM 4
+// #define SPOT_LIGHT_NUM 4
 
 out vec4 FragColor;
 
@@ -42,8 +42,8 @@ struct SpotLight {
 };
 
 uniform DirectionalLight directionalLight;
-uniform PointLight pointLight;
-uniform SpotLight spotLights[SPOT_LIGHT_NUM];
+// uniform PointLight pointLight;
+// uniform SpotLight spotLights[SPOT_LIGHT_NUM];
 
 vec3 calculateDiffuse(vec3 lightColor, vec3 objectColor, vec3 lightDir, vec3 normal) {
     float diffuse = clamp(dot(-lightDir, normal), 0.0, 1.0);
@@ -108,10 +108,10 @@ void main() {
     vec3 normalN = normalize(normal);
     vec3 viewDir = normalize(worldPosition - cameraPosition);
 
-    // result += calculateDirectionalLight(directionalLight, normalN, viewDir);
+    result += calculateDirectionalLight(directionalLight, normalN, viewDir);
     // result += calculatePointLight(pointLight, normalN, viewDir);
-    for (int i = 0; i < SPOT_LIGHT_NUM; i++)
-        result += calculateSpotLight(spotLights[i], normalN, viewDir);
+    // for (int i = 0; i < SPOT_LIGHT_NUM; i++)
+    //     result += calculateSpotLight(spotLights[i], normalN, viewDir);
 
     // 环境光
     vec3 ambientColor = objectColor * ambientColor; // 直接照亮

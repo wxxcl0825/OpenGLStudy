@@ -6,7 +6,8 @@
 
 enum class ObjectType {
     Object,
-    Mesh
+    Mesh,
+    Scene
 };
 
 class Object {
@@ -30,6 +31,7 @@ public:
     void addChild(Object* obj);
     std::vector<Object*> getChildren();
     Object* getParent();
+    ObjectType getType() const { return mType; }
 
 protected:
     glm::vec3 mPosition{0.0f};  // 世界坐标系
