@@ -6,7 +6,7 @@ public:
     Object();
     ~Object();
 
-    void setPosistion(glm::vec3 pos);
+    void setPosition(glm::vec3 pos);
 
     // 增量变换
     void rotateX(float angle);

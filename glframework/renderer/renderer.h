@@ -20,7 +20,7 @@ public:
     void render(
         const std::vector<Mesh*>& meshes,
         Camera* camera,
-        SpotLight* spotLight,
+        const std::vector<SpotLight*>& spotLights,
         AmbientLight* ambLight);
 private:
     Shader* mPhongShader{nullptr};

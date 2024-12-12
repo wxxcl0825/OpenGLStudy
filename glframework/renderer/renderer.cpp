@@ -2,6 +2,8 @@
 #include "../material/phongMaterial.h"
 #include "../material/whiteMaterial.h"
 
+#include <string>
+
 Renderer::Renderer() {
     mPhongShader = new Shader("assets/shaders/phong.vert", "assets/shaders/phong.frag");
     mWhiteShader = new Shader("assets/shaders/white.vert", "assets/shaders/white.frag");
@@ -12,7 +14,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
-            SpotLight *spotLight, AmbientLight *ambLight) {
+            const std::vector<SpotLight*>& spotLights, AmbientLight *ambLight) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
@@ -45,14 +47,21 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
 
                 // 光源
-                shader->setVector3("spotLight.position", spotLight->getPosition());
-                shader->setVector3("spotLight.color", spotLight->mColor);
-                shader->setVector3("spotLight.targetDirection", spotLight->mTargetDirection);
-                shader->setFloat("spotLight.innerLine", glm::cos(glm::radians(spotLight->mInnerAngle)));
-                shader->setFloat("spotLight.outerLine", glm::cos(glm::radians(spotLight->mOuterAngle)));
-                shader->setFloat("spotLight.specularIntensity", spotLight->mSpecularIntensity);
-                shader->setVector3("ambientColor", ambLight->mColor);
-                shader->setFloat("shiness", phongMat->mShiness);
+                for (int i = 0; i < spotLights.size(); i++) {
+                    auto spotLight = spotLights[i];
+                    std::string baseName = "spotLights[";
+                    baseName.append(std::to_string(i));
+                    baseName.append("]");
+
+                    shader->setVector3(baseName + ".position", spotLight->getPosition());
+                    shader->setVector3(baseName + ".color", spotLight->mColor);
+                    shader->setVector3(baseName + ".targetDirection", spotLight->mTargetDirection);
+                    shader->setFloat(baseName + ".innerLine", glm::cos(glm::radians(spotLight->mInnerAngle)));
+                    shader->setFloat(baseName + ".outerLine", glm::cos(glm::radians(spotLight->mOuterAngle)));
+                    shader->setFloat(baseName + ".specularIntensity", spotLight->mSpecularIntensity);
+                    shader->setVector3("ambientColor", ambLight->mColor);
+                    shader->setFloat("shiness", phongMat->mShiness);
+                }
 
                 // 相机
                 shader->setVector3("cameraPosition", camera->mPosition);

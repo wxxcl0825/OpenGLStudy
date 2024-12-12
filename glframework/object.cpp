@@ -8,7 +8,7 @@ Object::~Object() {
 
 }
 
-void Object::setPosistion(glm::vec3 pos) {
+void Object::setPosition(glm::vec3 pos) {
     mPosition = pos;
 }
 
