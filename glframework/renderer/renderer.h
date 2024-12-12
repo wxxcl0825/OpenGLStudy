@@ -22,6 +22,9 @@ public:
         Camera* camera,
         const std::vector<SpotLight*>& spotLights,
         AmbientLight* ambLight);
+
+    void setClearColor(glm::vec3 color);
+
 private:
     Shader* mPhongShader{nullptr};
     Shader* mWhiteShader{nullptr};

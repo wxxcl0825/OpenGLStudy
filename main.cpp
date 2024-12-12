@@ -40,6 +40,8 @@ std::vector<Mesh*> meshes{};
 std::vector<SpotLight*> spotLights{};
 AmbientLight* ambLight = nullptr;
 
+glm::vec3 clearColor{};
+
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
 }
@@ -130,6 +132,29 @@ void prepare() {
 
 void initIMGUI() {
     ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(app->getWindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 410");
+}
+
+void renderIMGUI() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Hello, world!");
+    ImGui::Text("ChangeColor Demo");
+    ImGui::Button("Test Button", ImVec2(40, 20));
+    ImGui::ColorEdit3("Clear Color", (float *) &clearColor);
+    ImGui::End();
+
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(app->getWindow(), &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 int main() {    
@@ -154,6 +179,8 @@ int main() {
     while (app->update()) {
         cameraControl->update();
         renderer->render(meshes, camera, spotLights, ambLight);
+        renderer->setClearColor(clearColor);
+        renderIMGUI();
     }
 
     app->destroy();

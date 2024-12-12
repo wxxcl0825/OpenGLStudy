@@ -104,3 +104,7 @@ Shader* Renderer::pickShader(MaterialType type) {
 
     return result;
 }
+
+void Renderer::setClearColor(glm::vec3 color) {
+    glClearColor(color.r, color.g, color.b, 1.0f);
+}

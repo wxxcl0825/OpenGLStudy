@@ -37,6 +37,7 @@ public:
   uint32_t getHeight() const { return mHeight; };
 
   void getCursorPosition(double *x, double *y);
+  GLFWwindow* getWindow() { return mWindow; }
 
   void setResizeCallback(ResizeCallback callback) { mResizeCallback = callback; };
   void setKeyBoardCallback(KeyBoardCallback callback) { mKeyBoardCallback = callback; }
