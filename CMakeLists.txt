@@ -25,8 +25,10 @@ add_subdirectory(application)
 
 add_subdirectory(glframework)
 
+add_subdirectory(thirdParty/src)
+
 add_executable(openglStudy "main.cpp" "glad.c")
 
 find_package(glfw3 3.4 REQUIRED)
 
-target_link_libraries(openglStudy glfw wrapper app fw)
+target_link_libraries(openglStudy glfw wrapper app fw thirdparty)

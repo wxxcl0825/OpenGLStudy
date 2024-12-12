@@ -27,6 +27,10 @@
 
 #include "glframework/renderer/renderer.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 Renderer* renderer = nullptr;
 Camera* camera = nullptr;
 CameraControl* cameraControl = nullptr;
@@ -124,6 +128,10 @@ void prepare() {
     spotLights.push_back(spotLight4);
 }
 
+void initIMGUI() {
+    ImGui::CreateContext();
+}
+
 int main() {    
     if (!app->init(800, 600))
         return -1;
@@ -140,6 +148,7 @@ int main() {
 
     prepare();
     prepareCamera();
+    initIMGUI();
 
     // 执行窗体循环
     while (app->update()) {
