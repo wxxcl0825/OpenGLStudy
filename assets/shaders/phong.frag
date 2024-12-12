@@ -10,11 +10,17 @@ uniform sampler2D sampler;
 uniform sampler2D specularMaskSampler;
 
 // 光源参数
-uniform vec3 lightDirection;
+// uniform vec3 lightDirection;
+uniform vec3 lightPosition;
 uniform vec3 lightColor;
 uniform float specularIntensity;
 uniform vec3 ambientColor;
 uniform float shiness;
+
+// 点光源控制
+uniform float k2;
+uniform float k1;
+uniform float kc;
 
 // 相机世界位置
 uniform vec3 cameraPosition;
@@ -23,8 +29,12 @@ void main() {
     // 光照通用数据
     vec3 objectColor = texture(sampler, uv).xyz;
     vec3 normalN = normalize(normal);
-    vec3 lightDirN = normalize(lightDirection);
+    vec3 lightDirN = normalize(worldPosition - lightPosition);
     vec3 viewDir = normalize(worldPosition - cameraPosition);   // 视线方向
+
+    // 点光源衰减
+    float dist = length(worldPosition - lightPosition);
+    float attenuation = 1.0 / (k2 * dist * dist + k1 * dist + kc);
 
     // 漫反射
     float diffuse = clamp(dot(-lightDirN, normalN), 0.0, 1.0);   // 吸收率(cos theta), 处理 cos theta < 0 的情况(舍0)
@@ -50,7 +60,7 @@ void main() {
     // 环境光
     vec3 ambientColor = objectColor * ambientColor; // 直接照亮
 
-    vec3 finalColor = diffuseColor + specularColor + ambientColor; // 漫反射叠加镜面反射
+    vec3 finalColor = (diffuseColor + specularColor) * attenuation + ambientColor; // 漫反射叠加镜面反射
     
     FragColor = vec4(finalColor, 1.0);
 }

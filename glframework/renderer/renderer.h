@@ -3,6 +3,7 @@
 #include "../mesh.h"
 #include "../light/directionalLight.h"
 #include "../light/ambientLight.h"
+#include "../light/pointLight.h"
 #include "../../application/camera/camera.h"
 #include "../shader.h"
 
@@ -18,10 +19,11 @@ public:
     void render(
         const std::vector<Mesh*>& meshes,
         Camera* camera,
-        DirectionalLight* dirLight,
+        PointLight* pointLight,
         AmbientLight* ambLight);
 private:
     Shader* mPhongShader{nullptr};
+    Shader* mWhiteShader{nullptr};
 
     Shader* pickShader(MaterialType type);
 };

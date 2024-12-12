@@ -17,10 +17,13 @@
 
 #include "glframework/material/material.h"
 #include "glframework/material/phongMaterial.h"
+#include "glframework/material/whiteMaterial.h"
 #include "glframework/mesh.h"
 
 #include "glframework/light/directionalLight.h"
 #include "glframework/light/ambientLight.h"
+#include "glframework/light/pointLight.h"
+
 
 #include "glframework/renderer/renderer.h"
 
@@ -29,7 +32,7 @@ Camera* camera = nullptr;
 CameraControl* cameraControl = nullptr;
 
 std::vector<Mesh*> meshes{};
-DirectionalLight* dirLight = nullptr;
+PointLight* pointLight = nullptr;
 AmbientLight* ambLight = nullptr;
 
 void OnResize(int width, int height) {
@@ -76,7 +79,18 @@ void prepare() {
 
     meshes.push_back(mesh);
 
-    dirLight = new DirectionalLight();
+    auto geometryWhite = Geometry::createSphere(0.1f);
+    auto materialWhite = new WhiteMaterial();
+    auto meshWhite = new Mesh(geometryWhite, materialWhite);
+    meshWhite->setPosistion(glm::vec3(2.0f, 0.0f, 0.0f));
+
+    meshes.push_back(meshWhite);
+
+    pointLight = new PointLight();
+    pointLight->setPosistion(meshWhite->getPosition());
+    pointLight->mK2 = 0.017f;
+    pointLight->mK1 = 0.07f;
+    pointLight->mKc = 1.0f;
     ambLight = new AmbientLight();
     ambLight->mColor = glm::vec3(0.1f);
 }
@@ -101,7 +115,7 @@ int main() {
     // 执行窗体循环
     while (app->update()) {
         cameraControl->update();
-        renderer->render(meshes, camera, dirLight, ambLight);
+        renderer->render(meshes, camera, pointLight, ambLight);
     }
 
     app->destroy();

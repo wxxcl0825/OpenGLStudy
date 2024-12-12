@@ -1,8 +1,10 @@
 #include "renderer.h"
 #include "../material/phongMaterial.h"
+#include "../material/whiteMaterial.h"
 
 Renderer::Renderer() {
     mPhongShader = new Shader("assets/shaders/phong.vert", "assets/shaders/phong.frag");
+    mWhiteShader = new Shader("assets/shaders/white.vert", "assets/shaders/white.frag");
 }
 
 Renderer::~Renderer() {
@@ -10,7 +12,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
-            DirectionalLight *dirLight, AmbientLight *ambLight) {
+            PointLight *pointLight, AmbientLight *ambLight) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
@@ -43,11 +45,14 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
 
                 // 光源
-                shader->setVector3("lightDirection", dirLight->mDirection);
-                shader->setVector3("lightColor", dirLight->mColor);
-                shader->setFloat("specularIntensity", dirLight->mSpecularIntensity);
+                shader->setVector3("lightPosition", pointLight->getPosition());
+                shader->setVector3("lightColor", pointLight->mColor);
+                shader->setFloat("specularIntensity", pointLight->mSpecularIntensity);
                 shader->setVector3("ambientColor", ambLight->mColor);
                 shader->setFloat("shiness", phongMat->mShiness);
+                shader->setFloat("k1", pointLight->mK1);
+                shader->setFloat("k2", pointLight->mK2);
+                shader->setFloat("kc", pointLight->mKc);
 
                 // 相机
                 shader->setVector3("cameraPosition", camera->mPosition);
@@ -55,6 +60,12 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 // 法线矩阵
                 glm::mat4 normalMatrix = glm::transpose(glm::inverse(mesh->getModelMatrix()));
                 shader->setMatrix3x3("normalMatrix", glm::mat3(normalMatrix));
+                }
+                break;
+            case MaterialType::WhiteMaterial: {
+                shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());
+                shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
+                shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
                 }
                 break;
             default:
@@ -74,6 +85,9 @@ Shader* Renderer::pickShader(MaterialType type) {
     switch (type) {
         case MaterialType::PhongMaterial:
             result = mPhongShader;
+            break;
+        case MaterialType::WhiteMaterial:
+            result = mWhiteShader;
             break;
         default:
             break;
