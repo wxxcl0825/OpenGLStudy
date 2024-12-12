@@ -1,6 +1,14 @@
 #pragma once
 #include "core.h"
 
+#include <vector>
+
+
+enum class ObjectType {
+    Object,
+    Mesh
+};
+
 class Object {
 public:
     Object();
@@ -19,6 +27,10 @@ public:
     glm::mat4 getModelMatrix();
     glm::vec3 getPosition() const { return mPosition; }
 
+    void addChild(Object* obj);
+    std::vector<Object*> getChildren();
+    Object* getParent();
+
 protected:
     glm::vec3 mPosition{0.0f};  // 世界坐标系
 
@@ -28,4 +40,9 @@ protected:
     float mAngleZ{0.0f};
 
     glm::vec3 mScale{1.0f};
+
+    std::vector<Object*> mChildren{};
+    Object* mParent{nullptr};
+
+    ObjectType mType;
 };

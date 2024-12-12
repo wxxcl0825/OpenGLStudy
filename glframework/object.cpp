@@ -1,7 +1,8 @@
 #include "object.h"
+#include <iostream>
 
 Object::Object() {
-
+    mType = ObjectType::Object;
 }
 
 Object::~Object() {
@@ -41,4 +42,22 @@ glm::mat4 Object::getModelMatrix() {
     transform = glm::translate(glm::mat4(1.0f), mPosition) * transform;
 
     return transform;
+}
+
+void Object::addChild(Object* obj) {
+    auto iter = std::find(mChildren.begin(), mChildren.end(), obj);
+    if (iter != mChildren.end()) {
+        std::cerr << "Duplicate child added" << std::endl;
+        return;
+    }
+    mChildren.push_back(obj);
+    obj->mParent = this;
+}
+
+std::vector<Object*> Object::getChildren() {
+    return mChildren;
+}
+
+Object* Object::getParent() {
+    return mParent;
 }
