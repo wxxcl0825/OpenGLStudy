@@ -19,31 +19,18 @@
 #include "glframework/material/phongMaterial.h"
 #include "glframework/mesh.h"
 
-// GLuint vao;
-Shader* shader = nullptr;
-// Texture* grassTexture = nullptr;
-// Texture* landTexture = nullptr;
-// Texture* noiseTexture = nullptr;
-Texture* texture = nullptr;
-glm::mat4 transform(1.0);
-glm::mat4 viewMatrix(1.0f);
-glm::mat4 orthoMatrix(1.0f);
-glm::mat4 perspectiveMatrix(1.0f);
+#include "glframework/light/directionalLight.h"
+#include "glframework/light/ambientLight.h"
 
-PerspectiveCamera* camera = nullptr;
-// OrthographicCamera* camera = nullptr;
-// TrackBallCameraControl* cameraControl = nullptr;
-GameCameraControl* cameraControl = nullptr;
+#include "glframework/renderer/renderer.h"
 
-Geometry* geometry = nullptr;
+Renderer* renderer = nullptr;
+Camera* camera = nullptr;
+CameraControl* cameraControl = nullptr;
 
-// 平行光: 光线方向 + 强度(由颜色表示)
-glm::vec3 lightDirection = glm::vec3(-1.0f, -1.0f, -1.0f);
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-glm::vec3 ambientColor = glm::vec3(0.1f);
-
-// 高光反射强度(高光亮度)
-float specularIntensity = 0.5f;
+std::vector<Mesh*> meshes{};
+DirectionalLight* dirLight = nullptr;
+AmbientLight* ambLight = nullptr;
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -76,58 +63,28 @@ void prepareCamera() {
 }
 
 void prepare() {
-    auto geometry = Geometry::createSphere(3.0f);
-
-    auto material = new PhongMaterial();
-    material->mShiness = 32.0f;
-    material->mDiffuse = new Texture("assets/textures/noir.png", 0);
-
-    auto mesh = new Mesh(geometry, material);
-}
-
-void render() {
-    // 清理画布
-    GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-    // 渲染操作
-    // 绑定program(选择材质)
-    shader->begin();
-
-    // 切换贴图, 切换Shader Uniform变量, 切换vao, 绘制
-    texture->bind();
-    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
-    // shader->setVector3("uColor", 0.3, 0.4, 0.5);
-    // shader->setInt("grassSampler", 0);
-    // shader->setInt("landSampler", 1);
-    // shader->setInt("noiseSampler", 2);
-    shader->setInt("sampler", 0);
-    // shader->setFloat("width", texture->getWidth());
-    // shader->setFloat("height", texture->getHeight());
-    shader->setMatrix4x4("modelMatrix", transform);
-    shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
-    shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
-
-    // 光源相关参数
-    shader->setVector3("lightDirection", lightDirection);
-    shader->setVector3("lightColor", lightColor);
-    shader->setFloat("specularIntensity", specularIntensity);
-    shader->setVector3("ambientColor", ambientColor);
-
-    shader->setVector3("cameraPosition", camera->mPosition);
-
-    // 计算法线矩阵并下放
-    glm::mat4 normalMatrix = glm::transpose(glm::inverse(transform));
-    shader->setMatrix3x3("normalMatrix", glm::mat3(normalMatrix));
-
-    // 绑定vao(选择几何信息)
-    glBindVertexArray(geometry->getVao());
-
-    // 发出绘制指令
-    // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, geometry->getIndicesCount(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    renderer = new Renderer();
     
-    shader->end();
+    auto geometry = Geometry::createSphere(1.5f);
+
+    auto material1 = new PhongMaterial();
+    material1->mShiness = 10.0f;
+    material1->mDiffuse = new Texture("assets/textures/noir.png", 0);
+
+    auto material2 = new PhongMaterial();
+    material2->mShiness = 32.0f;
+    material2->mDiffuse = new Texture("assets/textures/land.jpg", 0);
+
+    auto mesh1 = new Mesh(geometry, material1);
+    auto mesh2 = new Mesh(geometry, material2);
+    mesh2->setPosistion(glm::vec3(3.0f, 0, 0));
+
+    meshes.push_back(mesh1);
+    meshes.push_back(mesh2);
+
+    dirLight = new DirectionalLight();
+    ambLight = new AmbientLight();
+    ambLight->mColor = glm::vec3(0.1f);
 }
 
 int main() {    
@@ -149,13 +106,13 @@ int main() {
 
     // 执行窗体循环
     while (app->update()) {
+        meshes[0]->rotateX(0.1f);
+        meshes[0]->rotateY(1.0f);
+
         cameraControl->update();
-        render();
+        renderer->render(meshes, camera, dirLight, ambLight);
     }
 
     app->destroy();
-    // delete grassTexture;
-    // delete landTexture;
-    delete texture;
     return 0;
 }

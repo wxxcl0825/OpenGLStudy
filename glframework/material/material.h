@@ -6,7 +6,10 @@ enum class MaterialType {
     PhongMaterial
 };
 
+class Renderer;
+
 class Material {
+friend Renderer;
 public:
     Material();
     ~Material();

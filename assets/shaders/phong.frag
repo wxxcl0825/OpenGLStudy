@@ -13,6 +13,7 @@ uniform vec3 lightDirection;
 uniform vec3 lightColor;
 uniform float specularIntensity;
 uniform vec3 ambientColor;
+uniform float shiness;
 
 // 相机世界位置
 uniform vec3 cameraPosition;
@@ -36,7 +37,7 @@ void main() {
     vec3 lightReflect = normalize(reflect(lightDirN, normalN));  // 反射方向
     float specular = clamp(dot(lightReflect, -viewDir), 0.0, 1.0);  // 反射率(cos theta)
     // 调整光斑大小(cos凸起区域过胖, 使用高次cos让它变瘦)
-    specular = pow(specular, 64);
+    specular = pow(specular, shiness);
     // 光强 * (cos theta)^N
     // 高光反射强度控制 specularIntensity
     vec3 specularColor = lightColor * specular * flag * specularIntensity; // 反射光直接反射, 并不是物体吸收后反射, 与物体颜色无关
