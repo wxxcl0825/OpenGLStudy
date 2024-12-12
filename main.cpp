@@ -65,22 +65,16 @@ void prepareCamera() {
 void prepare() {
     renderer = new Renderer();
     
-    auto geometry = Geometry::createSphere(1.5f);
+    auto geometry = Geometry::createBox(1.5f);
 
-    auto material1 = new PhongMaterial();
-    material1->mShiness = 10.0f;
-    material1->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    auto material = new PhongMaterial();
+    material->mShiness = 64.0f;
+    material->mDiffuse = new Texture("assets/textures/box.png", 0);
+    material->mSpecularMask = new Texture("assets/textures/sp_mask.png", 1);    // 将纹理贴图绑到1号单元
 
-    auto material2 = new PhongMaterial();
-    material2->mShiness = 32.0f;
-    material2->mDiffuse = new Texture("assets/textures/land.jpg", 0);
+    auto mesh = new Mesh(geometry, material);
 
-    auto mesh1 = new Mesh(geometry, material1);
-    auto mesh2 = new Mesh(geometry, material2);
-    mesh2->setPosistion(glm::vec3(3.0f, 0, 0));
-
-    meshes.push_back(mesh1);
-    meshes.push_back(mesh2);
+    meshes.push_back(mesh);
 
     dirLight = new DirectionalLight();
     ambLight = new AmbientLight();
@@ -106,9 +100,6 @@ int main() {
 
     // 执行窗体循环
     while (app->update()) {
-        meshes[0]->rotateX(0.1f);
-        meshes[0]->rotateY(1.0f);
-
         cameraControl->update();
         renderer->render(meshes, camera, dirLight, ambLight);
     }

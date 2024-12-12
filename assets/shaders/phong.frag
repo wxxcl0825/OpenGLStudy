@@ -7,6 +7,7 @@ in vec3 normal;
 in vec3 worldPosition;
 
 uniform sampler2D sampler;
+uniform sampler2D specularMaskSampler;
 
 // 光源参数
 uniform vec3 lightDirection;
@@ -39,8 +40,12 @@ void main() {
     // 调整光斑大小(cos凸起区域过胖, 使用高次cos让它变瘦)
     specular = pow(specular, shiness);
     // 光强 * (cos theta)^N
+
+    // 高光蒙版
+    float specularMask = texture(specularMaskSampler, uv).r;
+
     // 高光反射强度控制 specularIntensity
-    vec3 specularColor = lightColor * specular * flag * specularIntensity; // 反射光直接反射, 并不是物体吸收后反射, 与物体颜色无关
+    vec3 specularColor = lightColor * specular * flag * specularIntensity * specularMask; // 反射光直接反射, 并不是物体吸收后反射, 与物体颜色无关
 
     // 环境光
     vec3 ambientColor = objectColor * ambientColor; // 直接照亮

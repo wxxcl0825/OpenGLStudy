@@ -4,7 +4,6 @@ PhongMaterial::PhongMaterial() {
     mType = MaterialType::PhongMaterial;
 }
 
-PhongMaterial::~PhongMaterial()
-{
+PhongMaterial::~PhongMaterial() {
 
 }

@@ -32,6 +32,10 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 shader->setInt("sampler", 0);   // 纹理采样器 -> 纹理单元
                 // 纹理 -> 纹理单元 (需要获取mesh->mMaterial->mDiffuse)
                 phongMat->mDiffuse->bind();
+                
+                // 高光蒙版更新
+                shader->setInt("specularMaskSampler", 1);
+                phongMat->mSpecularMask->bind();
 
                 // MVP变换
                 shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());
