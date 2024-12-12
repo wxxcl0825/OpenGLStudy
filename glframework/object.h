@@ -22,6 +22,10 @@ public:
     void rotateY(float angle);
     void rotateZ(float angle);
 
+    void setAngleX(float angle);
+    void setAngleY(float angle);
+    void setAngleZ(float angle);
+
     void setScale(glm::vec3 scale);
 
     // 目的: 获取modelmatrix

@@ -5,6 +5,13 @@
 class Geometry {
 public:
     Geometry();
+    // 根据传入的数据构建Geometry
+    Geometry(
+        const std::vector<float>& positions,
+        const std::vector<float>& normals,
+        const std::vector<float>& uvs,
+        const std::vector<unsigned int>& indices
+    );
     ~Geometry();
 
     static Geometry* createBox(float size);

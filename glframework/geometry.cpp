@@ -6,6 +6,50 @@ Geometry::Geometry() {
 
 }
 
+Geometry::Geometry(
+        const std::vector<float>& positions,
+        const std::vector<float>& normals,
+        const std::vector<float>& uvs,
+        const std::vector<unsigned int>& indices
+) {
+    mIndicesCount = indices.size();
+
+    glGenBuffers(1, &mPosVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mPosVbo);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &mUvVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mUvVbo);
+    glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(float), uvs.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &mNormalVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mNormalVbo);
+    glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &mEbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEbo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &mVao);
+    glBindVertexArray(mVao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mPosVbo);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mUvVbo);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mNormalVbo);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEbo);
+
+    glBindVertexArray(0);
+}
+
 Geometry::~Geometry() {
     if (mVao != 0)
         glDeleteVertexArrays(1, &mVao);
