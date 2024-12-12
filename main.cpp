@@ -32,7 +32,7 @@ Camera* camera = nullptr;
 CameraControl* cameraControl = nullptr;
 
 std::vector<Mesh*> meshes{};
-PointLight* pointLight = nullptr;
+SpotLight* spotLight = nullptr;
 AmbientLight* ambLight = nullptr;
 
 void OnResize(int width, int height) {
@@ -68,7 +68,7 @@ void prepareCamera() {
 void prepare() {
     renderer = new Renderer();
     
-    auto geometry = Geometry::createBox(1.5f);
+    auto geometry = Geometry::createBox(2.0f);
 
     auto material = new PhongMaterial();
     material->mShiness = 64.0f;
@@ -86,11 +86,11 @@ void prepare() {
 
     meshes.push_back(meshWhite);
 
-    pointLight = new PointLight();
-    pointLight->setPosistion(meshWhite->getPosition());
-    pointLight->mK2 = 0.017f;
-    pointLight->mK1 = 0.07f;
-    pointLight->mKc = 1.0f;
+    spotLight = new SpotLight();
+    spotLight->setPosistion(meshWhite->getPosition());
+    spotLight->mTargetDirection = glm::vec3(-1.0f, 0.0f, 0.0f);
+    spotLight->mInnerAngle = 30.0f;
+    spotLight->mOuterAngle = 45.0f;
     ambLight = new AmbientLight();
     ambLight->mColor = glm::vec3(0.1f);
 }
@@ -107,7 +107,7 @@ int main() {
 
     // 设置openGL视口并清理颜色
     glViewport(0, 0, 800, 600);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
     prepare();
     prepareCamera();
@@ -115,7 +115,7 @@ int main() {
     // 执行窗体循环
     while (app->update()) {
         cameraControl->update();
-        renderer->render(meshes, camera, pointLight, ambLight);
+        renderer->render(meshes, camera, spotLight, ambLight);
     }
 
     app->destroy();

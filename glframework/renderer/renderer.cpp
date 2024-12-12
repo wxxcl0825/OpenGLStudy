@@ -12,7 +12,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
-            PointLight *pointLight, AmbientLight *ambLight) {
+            SpotLight *spotLight, AmbientLight *ambLight) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     
@@ -45,14 +45,14 @@ void Renderer::render(const std::vector<Mesh *> &meshes, Camera *camera,
                 shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
 
                 // 光源
-                shader->setVector3("lightPosition", pointLight->getPosition());
-                shader->setVector3("lightColor", pointLight->mColor);
-                shader->setFloat("specularIntensity", pointLight->mSpecularIntensity);
+                shader->setVector3("lightPosition", spotLight->getPosition());
+                shader->setVector3("lightColor", spotLight->mColor);
+                shader->setVector3("targetDirection", spotLight->mTargetDirection);
+                shader->setFloat("innerLine", glm::cos(glm::radians(spotLight->mInnerAngle)));
+                shader->setFloat("outerLine", glm::cos(glm::radians(spotLight->mOuterAngle)));
+                shader->setFloat("specularIntensity", spotLight->mSpecularIntensity);
                 shader->setVector3("ambientColor", ambLight->mColor);
                 shader->setFloat("shiness", phongMat->mShiness);
-                shader->setFloat("k1", pointLight->mK1);
-                shader->setFloat("k2", pointLight->mK2);
-                shader->setFloat("kc", pointLight->mKc);
 
                 // 相机
                 shader->setVector3("cameraPosition", camera->mPosition);

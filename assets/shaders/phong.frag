@@ -18,9 +18,14 @@ uniform vec3 ambientColor;
 uniform float shiness;
 
 // 点光源控制
-uniform float k2;
-uniform float k1;
-uniform float kc;
+// uniform float k2;
+// uniform float k1;
+// uniform float kc;
+
+// 聚光灯控制
+uniform vec3 targetDirection;
+uniform float innerLine;   // GPU计算cos消耗大, 在CPU计算后再下放(cos theta)
+uniform float outerLine;   // cos beta
 
 // 相机世界位置
 uniform vec3 cameraPosition;
@@ -31,10 +36,15 @@ void main() {
     vec3 normalN = normalize(normal);
     vec3 lightDirN = normalize(worldPosition - lightPosition);
     vec3 viewDir = normalize(worldPosition - cameraPosition);   // 视线方向
+    vec3 targetDirN = normalize(targetDirection);
 
     // 点光源衰减
-    float dist = length(worldPosition - lightPosition);
-    float attenuation = 1.0 / (k2 * dist * dist + k1 * dist + kc);
+    // float dist = length(worldPosition - lightPosition);
+    // float attenuation = 1.0 / (k2 * dist * dist + k1 * dist + kc);
+
+    // 聚光灯照射范围 clamp((cos gamma - cos beta) / (cos theta - cos beta))
+    float cGamma = dot(lightDirN, targetDirN);
+    float Spotintensity = clamp((cGamma - outerLine) / (innerLine - outerLine), 0.0, 1.0);
 
     // 漫反射
     float diffuse = clamp(dot(-lightDirN, normalN), 0.0, 1.0);   // 吸收率(cos theta), 处理 cos theta < 0 的情况(舍0)
@@ -60,7 +70,7 @@ void main() {
     // 环境光
     vec3 ambientColor = objectColor * ambientColor; // 直接照亮
 
-    vec3 finalColor = (diffuseColor + specularColor) * attenuation + ambientColor; // 漫反射叠加镜面反射
+    vec3 finalColor = (diffuseColor + specularColor) * Spotintensity + ambientColor; // 漫反射叠加镜面反射
     
     FragColor = vec4(finalColor, 1.0);
 }
