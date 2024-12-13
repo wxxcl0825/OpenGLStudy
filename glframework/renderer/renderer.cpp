@@ -13,10 +13,10 @@ Renderer::~Renderer() {
 
 }
 
-void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight) {
+void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight) {    
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    
+    glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     renderObject(scene, camera, dirLight, ambLight);
@@ -48,6 +48,19 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
         auto mesh = (Mesh *) object;
         auto geometry = mesh->mGeometry;
         auto material = mesh->mMaterial;
+
+        // 设置深度检测
+        if (material->mDepthTest) {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(material->mDepthFunc);
+        } else
+            glDisable(GL_DEPTH_TEST);
+
+        if (material->mDepthWrite)
+            glDepthMask(GL_TRUE);
+        else
+            glDepthMask(GL_FALSE);
+
 
         Shader* shader = pickShader(material->mType);
         // uniform 更新

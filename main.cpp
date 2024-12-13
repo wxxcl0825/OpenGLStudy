@@ -76,9 +76,24 @@ void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    auto testModel = AssimpLoader::load("assets/obj/bag/backpack.obj");
-    testModel->setScale(glm::vec3(0.5f));
-    scene->addChild(testModel);
+    auto geometry = Geometry::createPlane(5.0f, 5.0f);
+    auto materialA = new PhongMaterial();
+    materialA->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    auto meshA = new Mesh(geometry, materialA);
+    scene->addChild(meshA);
+
+    auto materialB = new PhongMaterial();
+    materialB->mDiffuse = new Texture("assets/textures/box.png", 0);
+    materialB->mDepthWrite = false;
+    auto meshB = new Mesh(geometry, materialB);
+    meshB->setPosition(glm::vec3(2.0f, 0.5f, -1.0f));
+    scene->addChild(meshB);
+
+    auto materialC = new PhongMaterial();
+    materialC->mDiffuse = new Texture("assets/textures/land.jpg", 0);
+    auto meshC = new Mesh(geometry, materialC);
+    meshC->setPosition(glm::vec3(4.0f, 1.0f, -2.0f));
+    scene->addChild(meshC);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);

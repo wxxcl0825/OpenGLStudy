@@ -14,6 +14,11 @@ public:
     Material();
     ~Material();
 
+    // 深度检测
+    bool mDepthTest{ true };
+    GLenum mDepthFunc{ GL_LESS };
+    bool mDepthWrite { true };
+
 protected:
     MaterialType mType;
 };
