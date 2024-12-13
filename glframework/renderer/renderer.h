@@ -31,6 +31,7 @@ public:
 private:
     Shader* mPhongShader{nullptr};
     Shader* mWhiteShader{nullptr};
+    Shader* mDepthShader{nullptr};
 
     Shader* pickShader(MaterialType type);
 };

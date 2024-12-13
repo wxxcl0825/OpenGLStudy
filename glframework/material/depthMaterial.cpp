@@ -1,7 +1,7 @@
-#include "whiteMaterial.h"
+#include "depthMaterial.h"
 
 DepthMaterial::DepthMaterial() {
-    mType = MaterialType::WhiteMaterial;
+    mType = MaterialType::DepthMaterial;
 }
 
 DepthMaterial::~DepthMaterial() {

@@ -65,7 +65,7 @@ void onScroll(double offset) {
 }
 
 void prepareCamera() {
-    camera = new PerspectiveCamera(60.0f, (float)(glApp->getWidth()) / (float)(glApp->getHeight()), 0.1f, 1000.0f);
+    camera = new PerspectiveCamera(60.0f, (float)(glApp->getWidth()) / (float)(glApp->getHeight()), 0.1f, 50.0f);
     // cameraControl = new TrackBallCameraControl();
     cameraControl = new GameCameraControl();
     cameraControl->setCamera(camera);
@@ -77,21 +77,15 @@ void prepare() {
     scene = new Scene();
 
     auto geometry = Geometry::createPlane(5.0f, 5.0f);
-    auto materialA = new PhongMaterial();
-    materialA->mDiffuse = new Texture("assets/textures/noir.png", 0);
-    auto meshA = new Mesh(geometry, materialA);
+    auto material = new DepthMaterial();
+    auto meshA = new Mesh(geometry, material);
     scene->addChild(meshA);
 
-    auto materialB = new PhongMaterial();
-    materialB->mDiffuse = new Texture("assets/textures/box.png", 0);
-    materialB->mDepthWrite = false;
-    auto meshB = new Mesh(geometry, materialB);
+    auto meshB = new Mesh(geometry, material);
     meshB->setPosition(glm::vec3(2.0f, 0.5f, -1.0f));
     scene->addChild(meshB);
 
-    auto materialC = new PhongMaterial();
-    materialC->mDiffuse = new Texture("assets/textures/land.jpg", 0);
-    auto meshC = new Mesh(geometry, materialC);
+    auto meshC = new Mesh(geometry, material);
     meshC->setPosition(glm::vec3(4.0f, 1.0f, -2.0f));
     scene->addChild(meshC);
 

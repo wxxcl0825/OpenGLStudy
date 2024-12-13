@@ -7,6 +7,7 @@
 Renderer::Renderer() {
     mPhongShader = new Shader("assets/shaders/phong.vert", "assets/shaders/phong.frag");
     mWhiteShader = new Shader("assets/shaders/white.vert", "assets/shaders/white.frag");
+    mDepthShader = new Shader("assets/shaders/depth.vert", "assets/shaders/depth.frag");
 }
 
 Renderer::~Renderer() {
@@ -31,6 +32,9 @@ Shader* Renderer::pickShader(MaterialType type) {
             break;
         case MaterialType::WhiteMaterial:
             result = mWhiteShader;
+            break;
+        case MaterialType::DepthMaterial:
+            result = mDepthShader;
             break;
         default:
             break;
@@ -103,6 +107,14 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
                 shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());
                 shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
                 shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
+                }
+                break;
+            case MaterialType::DepthMaterial: {
+                shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());
+                shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
+                shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
+                shader->setFloat("near", camera->mNear);
+                shader->setFloat("far", camera->mFar);
                 }
                 break;
             default:
