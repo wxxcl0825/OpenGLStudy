@@ -63,8 +63,8 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
                 phongMat->mDiffuse->bind();
                 
                 // 高光蒙版更新
-                shader->setInt("specularMaskSampler", 1);
-                phongMat->mSpecularMask->bind();
+                // shader->setInt("specularMaskSampler", 1);
+                // phongMat->mSpecularMask->bind();
 
                 // MVP变换
                 shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());

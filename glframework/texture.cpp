@@ -3,6 +3,28 @@
 #include "stb/stb_image.h"
 #include "../wrapper/checkError.h"
 
+std::map<std::string, Texture*> Texture::mTextureCache{};
+
+Texture* Texture::createTexture(const std::string& path, unsigned int unit) {
+    auto iter = mTextureCache.find(path);
+    if (iter != mTextureCache.end())
+        return iter->second;
+    auto texture = new Texture(path, unit);
+    mTextureCache[path] = texture;
+
+    return texture;
+}
+
+Texture* Texture::createTexture(const std::string& path, unsigned int unit, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn) {
+    auto iter = mTextureCache.find(path);
+    if (iter != mTextureCache.end())
+        return iter->second;
+    auto texture = new Texture(unit, dataIn, widthIn, heightIn);
+    mTextureCache[path] = texture;
+
+    return texture;
+}
+
 Texture::Texture(const std::string& path, unsigned int unit) {
     mUnit = unit;
     
@@ -29,6 +51,36 @@ Texture::Texture(const std::string& path, unsigned int unit) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);   // v 方向
 }
 
+Texture::Texture(unsigned int unit, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn) {
+    mUnit = unit;
+    
+    int channels;
+    stbi_set_flip_vertically_on_load(true);
+
+    // 计算整张图片的大小
+    // Assimp规定 png, jpg 的 height = 0, width代表图片大小
+    uint32_t dataInSize = 0;
+    if (!heightIn)
+        dataInSize = widthIn;
+    else
+        dataInSize = widthIn * heightIn * 4;    // 统一认为数据格式是RGBA
+
+    unsigned char* data = stbi_load_from_memory(dataIn, dataInSize, &mWidth, &mHeight, &channels, STBI_rgb_alpha);
+
+    GL_CALL(glGenTextures(1, &mTexture));
+    GL_CALL(glActiveTexture(GL_TEXTURE0 + mUnit));
+    GL_CALL(glBindTexture(GL_TEXTURE_2D, mTexture));
+    
+    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
 
 Texture::~Texture() {
     if (mTexture != 0) {

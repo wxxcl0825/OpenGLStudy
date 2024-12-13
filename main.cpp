@@ -15,6 +15,8 @@
 #include "application/camera/gameCameraControl.h"
 #include "application/camera/trackBallCameraControl.h"
 
+#include "application/assimpLoader.h"
+
 #include "glframework/material/material.h"
 #include "glframework/material/phongMaterial.h"
 #include "glframework/material/whiteMaterial.h"
@@ -23,7 +25,6 @@
 #include "glframework/light/directionalLight.h"
 #include "glframework/light/ambientLight.h"
 #include "glframework/light/pointLight.h"
-
 
 #include "glframework/renderer/renderer.h"
 
@@ -51,7 +52,7 @@ void onKey(int key, int action, int mods) {
 
 void onMouse(int button, int action, int mods) {
     double x = 0, y = 0;
-    app->getCursorPosition(&x, &y);
+    glApp->getCursorPosition(&x, &y);
     cameraControl->onMouse(button, action, x, y);
 }
 
@@ -64,7 +65,7 @@ void onScroll(double offset) {
 }
 
 void prepareCamera() {
-    camera = new PerspectiveCamera(60.0f, (float)(app->getWidth()) / (float)(app->getHeight()), 0.1f, 1000.0f);
+    camera = new PerspectiveCamera(60.0f, (float)(glApp->getWidth()) / (float)(glApp->getHeight()), 0.1f, 1000.0f);
     // cameraControl = new TrackBallCameraControl();
     cameraControl = new GameCameraControl();
     cameraControl->setCamera(camera);
@@ -74,24 +75,14 @@ void prepareCamera() {
 void prepare() {
     renderer = new Renderer();
     scene = new Scene();
-    
-    auto geometry = Geometry::createBox(1.0f);
-    auto spGeometry = Geometry::createSphere(1.0f);
 
-    auto material = new PhongMaterial();
-    material->mShiness = 16.0f;
-    material->mDiffuse = new Texture("assets/textures/box.png", 0);
-    material->mSpecularMask = new Texture("assets/textures/sp_mask.png", 1);    // 将纹理贴图绑到1号单元
-
-    auto mesh = new Mesh(geometry, material);
-    auto spMesh = new Mesh(spGeometry, material);
-    spMesh->setPosition(glm::vec3(2.0f, 0.0f, 0.0f));
-
-    mesh->addChild(spMesh);
-    scene->addChild(mesh);
+    auto testModel = AssimpLoader::load("assets/obj/bag/backpack.obj");
+    testModel->setScale(glm::vec3(0.5f));
+    scene->addChild(testModel);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);
+    dirLight->mSpecularIntensity = 0.1f;
     
     ambLight = new AmbientLight();
     ambLight->mColor = glm::vec3(0.1f);
@@ -101,7 +92,7 @@ void initIMGUI() {
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
-    ImGui_ImplGlfw_InitForOpenGL(app->getWindow(), true);
+    ImGui_ImplGlfw_InitForOpenGL(glApp->getWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 410");
 }
 
@@ -118,21 +109,21 @@ void renderIMGUI() {
 
     ImGui::Render();
     int display_w, display_h;
-    glfwGetFramebufferSize(app->getWindow(), &display_w, &display_h);
+    glfwGetFramebufferSize(glApp->getWindow(), &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 int main() {    
-    if (!app->init(800, 600))
+    if (!glApp->init(800, 600))
         return -1;
 
-    app->setResizeCallback(OnResize);
-    app->setKeyBoardCallback(onKey);
-    app->setMouseCallback(onMouse);
-    app->setCursorCallback(onCursor);
-    app->setScrollCallback(onScroll);
+    glApp->setResizeCallback(OnResize);
+    glApp->setKeyBoardCallback(onKey);
+    glApp->setMouseCallback(onMouse);
+    glApp->setCursorCallback(onCursor);
+    glApp->setScrollCallback(onScroll);
 
     // 设置openGL视口并清理颜色
     glViewport(0, 0, 800, 600);
@@ -143,13 +134,13 @@ int main() {
     initIMGUI();
 
     // 执行窗体循环
-    while (app->update()) {
+    while (glApp->update()) {
         cameraControl->update();
         renderer->setClearColor(clearColor);
         renderer->render(scene, camera, dirLight, ambLight);
         renderIMGUI();
     }
 
-    app->destroy();
+    glApp->destroy();
     return 0;
 }

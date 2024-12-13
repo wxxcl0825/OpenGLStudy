@@ -4,7 +4,7 @@
 #include <cstdint>
 
 
-#define app Application::getInstance()
+#define glApp Application::getInstance()
 
 using ResizeCallback = void(*)(int width, int height);
 using KeyBoardCallback = void(*)(int key, int action, int mods);
