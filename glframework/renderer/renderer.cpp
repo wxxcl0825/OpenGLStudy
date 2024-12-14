@@ -18,6 +18,8 @@ void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
+    glDisable(GL_POLYGON_OFFSET_FILL);
+    glDisable(GL_POLYGON_OFFSET_LINE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     renderObject(scene, camera, dirLight, ambLight);
@@ -64,6 +66,18 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
             glDepthMask(GL_TRUE);
         else
             glDepthMask(GL_FALSE);
+
+        // 设置Polygon Offset
+        // 目的L 消除zFighting
+        // glEnable(GL_POLYGON_OFFSET_FILL); // FILL: 面片; LINE: 线
+        // glPolygonOffset(1.0f, 0.0f); // factor: 深度值关于屏幕像素变化越快, 增加的z值越大(远处), offset越大; units: 将深度值增加几个基本单元
+        if (material->mPolygonOffset) {
+            glEnable(material->mPolygonOffsetType);
+            glPolygonOffset(material->mFactor, material->mUnit);
+        } else {
+            glDisable(GL_POLYGON_OFFSET_FILL);
+            glDisable(GL_POLYGON_OFFSET_LINE);
+        }
 
 
         Shader* shader = pickShader(material->mType);
