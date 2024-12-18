@@ -2,8 +2,8 @@
 
 #include "material.h"
 
-class DepthMaterial : public Material {
+class WhiteMaterial : public Material {
 public:
-    DepthMaterial();
-    ~DepthMaterial();
+    WhiteMaterial();
+    ~WhiteMaterial();
 };

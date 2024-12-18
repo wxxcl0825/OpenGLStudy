@@ -20,7 +20,10 @@ void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, 
     glDepthMask(GL_TRUE);
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_POLYGON_OFFSET_LINE);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilMask(0xFF);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     renderObject(scene, camera, dirLight, ambLight);
 }
@@ -56,28 +59,11 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
         auto material = mesh->mMaterial;
 
         // 设置深度检测
-        if (material->mDepthTest) {
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(material->mDepthFunc);
-        } else
-            glDisable(GL_DEPTH_TEST);
-
-        if (material->mDepthWrite)
-            glDepthMask(GL_TRUE);
-        else
-            glDepthMask(GL_FALSE);
-
+        setDepthState(material);
         // 设置Polygon Offset
-        // 目的L 消除zFighting
-        // glEnable(GL_POLYGON_OFFSET_FILL); // FILL: 面片; LINE: 线
-        // glPolygonOffset(1.0f, 0.0f); // factor: 深度值关于屏幕像素变化越快, 增加的z值越大(远处), offset越大; units: 将深度值增加几个基本单元
-        if (material->mPolygonOffset) {
-            glEnable(material->mPolygonOffsetType);
-            glPolygonOffset(material->mFactor, material->mUnit);
-        } else {
-            glDisable(GL_POLYGON_OFFSET_FILL);
-            glDisable(GL_POLYGON_OFFSET_LINE);
-        }
+        setPolygonOffsetState(material);
+        // 设置模版测试
+        setStencilState(material);
 
 
         Shader* shader = pickShader(material->mType);
@@ -144,5 +130,42 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
     auto children = object->getChildren();
     for (auto child: children) {
         renderObject(child, camera, dirLight, ambLight);
+    }
+}
+
+void Renderer::setDepthState(Material* material) {
+    if (material->mDepthTest) {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(material->mDepthFunc);
+    } else
+        glDisable(GL_DEPTH_TEST);
+
+    if (material->mDepthWrite)
+        glDepthMask(GL_TRUE);
+    else
+        glDepthMask(GL_FALSE);
+}
+
+void Renderer::setPolygonOffsetState(Material* material) {
+    // 目的: 消除zFighting
+    // glEnable(GL_POLYGON_OFFSET_FILL); // FILL: 面片; LINE: 线
+    // glPolygonOffset(1.0f, 0.0f); // factor: 深度值关于屏幕像素变化越快, 增加的z值越大(远处), offset越大; units: 将深度值增加几个基本单元
+    if (material->mPolygonOffset) {
+        glEnable(material->mPolygonOffsetType);
+        glPolygonOffset(material->mFactor, material->mUnit);
+    } else {
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glDisable(GL_POLYGON_OFFSET_LINE);
+    }
+}
+
+void Renderer::setStencilState(Material* material) {
+    if (material->mStencilTest) {
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(material->mSFail, material->mZFail, material->mZPass);
+        glStencilMask(material->mStencilMask);
+        glStencilFunc(material->mStencilFunc, material->mStencilRef, material->mStencilFuncMask);
+    } else {
+        glDisable(GL_STENCIL_TEST);
     }
 }

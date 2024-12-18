@@ -34,4 +34,7 @@ private:
     Shader* mDepthShader{nullptr};
 
     Shader* pickShader(MaterialType type);
+    void setDepthState(Material* material);
+    void setPolygonOffsetState(Material* material);
+    void setStencilState(Material* material);
 };

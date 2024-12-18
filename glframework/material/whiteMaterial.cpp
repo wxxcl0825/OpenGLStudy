@@ -1,9 +1,9 @@
 #include "whiteMaterial.h"
 
-DepthMaterial::DepthMaterial() {
+WhiteMaterial::WhiteMaterial() {
     mType = MaterialType::WhiteMaterial;
 }
 
-DepthMaterial::~DepthMaterial() {
+WhiteMaterial::~WhiteMaterial() {
 
 }

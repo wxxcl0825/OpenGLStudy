@@ -76,21 +76,35 @@ void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    auto geometry = Geometry::createPlane(5.0f, 5.0f);
+    // 普通方块
+    auto geometry = Geometry::createBox(4);
     auto materialA = new PhongMaterial();
     materialA->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    materialA->mStencilTest = true;
+    materialA->mSFail = GL_KEEP;
+    materialA->mZFail = GL_KEEP;
+    materialA->mZPass = GL_REPLACE;
+    materialA->mStencilMask = 0xFF;
+    materialA->mStencilFunc = GL_ALWAYS;
+    materialA->mStencilRef = 1;
+    materialA->mStencilFuncMask = 0xFF;
     auto meshA = new Mesh(geometry, materialA);
     scene->addChild(meshA);
 
-    auto materialB = new PhongMaterial();
-    materialB->mDiffuse = new Texture("assets/textures/box.png", 0);
-    materialB->mDepthWrite = false;
-    materialB->mPolygonOffset = true;
-    materialB->mFactor = 1.0f;
-    materialB->mUnit = 1.0f;
-    auto meshB = new Mesh(geometry, materialB);
-    meshB->setPosition(glm::vec3(2.0f, 0.5f, -0.000001f));
-    scene->addChild(meshB);
+    // 钩边方块
+    auto materialABound = new WhiteMaterial();
+    auto meshABound = new Mesh(geometry, materialABound);
+    materialABound->mStencilTest = true;
+    materialABound->mSFail = GL_KEEP;
+    materialABound->mZFail = GL_KEEP;
+    materialABound->mZPass = GL_KEEP;
+    materialABound->mStencilMask = 0x00;
+    materialABound->mStencilFunc = GL_NOTEQUAL;
+    materialABound->mStencilRef = 1;
+    materialABound->mStencilFuncMask = 0xFF;
+    meshABound->setPosition(meshA->getPosition());
+    meshABound->setScale(glm::vec3(1.2f));
+    scene->addChild(meshABound);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);
