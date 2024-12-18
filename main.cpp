@@ -23,6 +23,7 @@
 #include "glframework/material/opacityMaskMaterial.h"
 #include "glframework/material/screenMaterial.h"
 #include "glframework/material/cubeMaterial.h"
+#include "glframework/material/phongEnvMaterial.h"
 
 #include "glframework/mesh.h"
 
@@ -107,7 +108,7 @@ void prepare() {
         "assets/textures/skybox/back.jpg",
         "assets/textures/skybox/front.jpg"
     };
-
+    
     auto boxGeo = Geometry::createBox(1.0f);
     auto boxMat = new CubeMaterial();
     boxMat->mDiffuse = new Texture(paths, 0);
@@ -116,8 +117,9 @@ void prepare() {
     scene->addChild(boxMesh);
 
     auto sphereGeo = Geometry::createSphere(4.0f);
-    auto sphereMat = new PhongMaterial();
+    auto sphereMat = new PhongEnvMaterial();
     sphereMat->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    sphereMat->mEnv = new Texture(paths, 1);
     auto sphereMesh = new Mesh(sphereGeo, sphereMat);
     scene->addChild(sphereMesh);
 
