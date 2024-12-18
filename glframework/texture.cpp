@@ -67,13 +67,13 @@ Texture::Texture(const std::string& path, unsigned int unit) {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, mTexture));
     
     GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)); // 传输时开辟显存
-    glGenerateMipmap(GL_TEXTURE_2D);    // Mipmap自动生成
+    // glGenerateMipmap(GL_TEXTURE_2D);    // Mipmap自动生成
     stbi_image_free(data);
 
     // 设置纹理过滤方式
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);   //  所需像素数 > 纹理像素数: linear过滤, 平滑图像
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);   //  所需像素数 > 纹理像素数: linear过滤, 平滑图像
     // GL_NEAREST: 在mipmap上的采样方式   MIPMAP_LINEAR: 在mipmap层次上做线性插值(叠加方法)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);  //  所需像素数 < 纹理像素数: nearest过滤, 增强变化
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);  //  所需像素数 < 纹理像素数: nearest过滤, 增强变化
 
     // 设置纹理包裹方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // u 方向

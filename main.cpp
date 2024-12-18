@@ -100,26 +100,16 @@ void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    std::vector<std::string> paths = {
-        "assets/textures/skybox/right.jpg",
-        "assets/textures/skybox/left.jpg",
-        "assets/textures/skybox/top.jpg",
-        "assets/textures/skybox/bottom.jpg",
-        "assets/textures/skybox/back.jpg",
-        "assets/textures/skybox/front.jpg"
-    };
-    
     auto boxGeo = Geometry::createBox(1.0f);
     auto boxMat = new CubeMaterial();
-    boxMat->mDiffuse = new Texture(paths, 0);
+    boxMat->mDiffuse = new Texture("assets/textures/sphericalMap.jpg", 0);
     // boxMat->mDepthWrite = false;    // 若绘制天空盒, 需关闭深度写入(或让shader使用输出深度值=1)
     auto boxMesh = new Mesh(boxGeo, boxMat);
     scene->addChild(boxMesh);
 
     auto sphereGeo = Geometry::createSphere(4.0f);
-    auto sphereMat = new PhongEnvMaterial();
+    auto sphereMat = new PhongMaterial();
     sphereMat->mDiffuse = new Texture("assets/textures/noir.png", 0);
-    sphereMat->mEnv = new Texture(paths, 1);
     auto sphereMesh = new Mesh(sphereGeo, sphereMat);
     scene->addChild(sphereMesh);
 
