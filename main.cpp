@@ -37,7 +37,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-int WIDTH = 1600, HEIGHT = 1200;
+int WIDTH = 800, HEIGHT = 600;
 
 Renderer* renderer = nullptr;
 Scene* sceneOffscreen = nullptr;
@@ -105,13 +105,13 @@ void prepare() {
     // Pass1: 离屏渲染
     auto boxGeo = Geometry::createBox(1.0f);
     auto boxMat = new PhongMaterial();
-    boxMat->mDiffuse = new Texture("assets/textures/grass_.jpg", 0);
+    boxMat->mDiffuse = new Texture("assets/textures/noir.png", 0);
     auto boxMesh = new Mesh(boxGeo, boxMat);
     sceneOffscreen->addChild(boxMesh);
 
     // Pass2: 贴屏渲染
     auto geo = Geometry::createScreenPlane();
-    auto mat = new ScreenMaterial();
+    auto mat = new ScreenMaterial(); // 后处理
     mat->mScreenTexture = frameBuffer->mColorAttachment;
     auto mesh = new Mesh(geo, mat);
     sceneInscreen->addChild(mesh);

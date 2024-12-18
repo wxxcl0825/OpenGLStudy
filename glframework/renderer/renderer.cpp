@@ -204,6 +204,9 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
             case MaterialType::ScreenMaterial: {
                     ScreenMaterial* screenMat = (ScreenMaterial*) material;
                     shader->setInt("screenTexSampler", 0);
+                    // 临时设置
+                    shader->setFloat("texWidth", 800);
+                    shader->setFloat("texHeight", 600);
                     screenMat->mScreenTexture->bind();
                 }
                 break;
