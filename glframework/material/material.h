@@ -3,7 +3,7 @@
 #include "../core.h"
 
 enum class MaterialType {
-    PhongMaterial, WhiteMaterial, DepthMaterial
+    PhongMaterial, WhiteMaterial, DepthMaterial, OpacityMaskMaterial
 };
 
 class Renderer;

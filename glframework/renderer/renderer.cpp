@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "../material/phongMaterial.h"
 #include "../material/whiteMaterial.h"
+#include "../material/opacityMaskMaterial.h"
 
 #include <string>
 #include <algorithm>
@@ -9,6 +10,7 @@ Renderer::Renderer() {
     mPhongShader = new Shader("assets/shaders/phong.vert", "assets/shaders/phong.frag");
     mWhiteShader = new Shader("assets/shaders/white.vert", "assets/shaders/white.frag");
     mDepthShader = new Shader("assets/shaders/depth.vert", "assets/shaders/depth.frag");
+    mOpacityMaskShader = new Shader("assets/shaders/phongOpacityMask.vert", "assets/shaders/phongOpacityMask.frag");
 }
 
 Renderer::~Renderer() {
@@ -68,6 +70,9 @@ Shader* Renderer::pickShader(MaterialType type) {
             break;
         case MaterialType::DepthMaterial:
             result = mDepthShader;
+            break;
+        case MaterialType::OpacityMaskMaterial:
+            result = mOpacityMaskShader;
             break;
         default:
             break;
@@ -148,6 +153,37 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
                 shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
                 shader->setFloat("near", camera->mNear);
                 shader->setFloat("far", camera->mFar);
+                }
+                break;
+            case MaterialType::OpacityMaskMaterial: {
+                OpacityMaskMaterial* opacityMat = (OpacityMaskMaterial*) material;
+                // diffuse贴图
+                shader->setInt("sampler", 0);
+                opacityMat->mDiffuse->bind();
+                
+                // 透明度模版
+                shader->setInt("opacityMaskSampler", 1);
+                opacityMat->mOpacityMask->bind();
+
+                shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());
+                shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
+                shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
+
+                shader->setVector3("directionalLight.direction", dirLight->mDirection);
+                shader->setVector3("directionalLight.color", dirLight->mColor);
+                shader->setFloat("directionalLight.specularIntensity", dirLight->mSpecularIntensity);
+                shader->setVector3("ambientColor", ambLight->mColor);
+                shader->setFloat("shiness", opacityMat->mShiness);
+
+                // 相机
+                shader->setVector3("cameraPosition", camera->mPosition);
+
+                // 法线矩阵
+                glm::mat4 normalMatrix = glm::transpose(glm::inverse(mesh->getModelMatrix()));
+                shader->setMatrix3x3("normalMatrix", glm::mat3(normalMatrix));
+
+                // 透明度
+                shader->setFloat("opacity", material->mOpacity);
                 }
                 break;
             default:

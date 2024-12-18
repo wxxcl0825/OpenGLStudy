@@ -32,6 +32,7 @@ private:
     Shader* mPhongShader{nullptr};
     Shader* mWhiteShader{nullptr};
     Shader* mDepthShader{nullptr};
+    Shader* mOpacityMaskShader{nullptr};
 
     Shader* pickShader(MaterialType type);
     void setDepthState(Material* material);
