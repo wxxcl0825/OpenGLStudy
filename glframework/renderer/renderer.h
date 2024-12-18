@@ -28,6 +28,8 @@ public:
 
     void setClearColor(glm::vec3 color);
 
+    Material* mGlobalMaterial{nullptr}; // 全局材质
+
 private:
     Shader* mPhongShader{nullptr};
     Shader* mWhiteShader{nullptr};

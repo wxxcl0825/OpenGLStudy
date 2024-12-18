@@ -90,13 +90,17 @@ void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    auto planeGeo = Geometry::createPlane(5.0, 5.0);
-    auto planeMat = new OpacityMaskMaterial();
-    planeMat->mDiffuse = new Texture("assets/textures/grass_.jpg", 0);
-    planeMat->mOpacityMask = new Texture("assets/textures/grassMask.png", 1);
-    planeMat->mBlend = true;
-    auto planeMesh = new Mesh(planeGeo, planeMat);
-    scene->addChild(planeMesh);
+    auto grassModel = AssimpLoader::load("assets/fbx/grass.fbx");
+    grassModel->setScale(glm::vec3(0.02f));
+    scene->addChild(grassModel);
+
+    auto grassMat = new OpacityMaskMaterial();
+    grassMat->mDiffuse = new Texture("assets/textures/grass_.jpg", 0);
+    grassMat->mOpacityMask = new Texture("assets/textures/grassMask.png", 1);
+    grassMat->mBlend = true;
+    grassMat->mDepthWrite = false;
+
+    renderer->mGlobalMaterial = grassMat;
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);

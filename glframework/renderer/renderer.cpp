@@ -89,7 +89,12 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
     if (object->getType() == ObjectType::Mesh) {
         auto mesh = (Mesh *) object;
         auto geometry = mesh->mGeometry;
-        auto material = mesh->mMaterial;
+
+        Material* material = nullptr;
+        if (mGlobalMaterial != nullptr)
+            material = mGlobalMaterial;
+        else
+            material = mesh->mMaterial;
 
         // 设置深度检测
         setDepthState(material);
