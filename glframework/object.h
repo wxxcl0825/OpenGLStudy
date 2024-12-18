@@ -29,7 +29,7 @@ public:
     void setScale(glm::vec3 scale);
 
     // 目的: 获取modelmatrix
-    glm::mat4 getModelMatrix();
+    glm::mat4 getModelMatrix() const;
     glm::vec3 getPosition() const { return mPosition; }
 
     void addChild(Object* obj);

@@ -90,8 +90,24 @@ void prepare() {
     scene = new Scene();
 
     auto model = AssimpLoader::load("assets/obj/bag/backpack.obj");
-    setModelBlend(model, true, 0.5f);
+    setModelBlend(model, true, 0.2f);
     scene->addChild(model);
+
+    auto planeGeo = Geometry::createPlane(5.0, 5.0);
+    auto planeMat = new PhongMaterial();
+    planeMat->mDiffuse = new Texture("assets/textures/box.png", 0);
+    auto planeMesh = new Mesh(planeGeo, planeMat);
+    planeMesh->setPosition(glm::vec3(0.0f, 0.0f, 6.0f));
+    scene->addChild(planeMesh);
+
+    auto planeGeoTrans = Geometry::createPlane(10.0, 10.0);
+    auto planeMatTrans = new PhongMaterial();
+    planeMatTrans->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    planeMatTrans->mBlend = true;
+    planeMatTrans->mOpacity = 0.4f;
+    auto planeMeshTrans = new Mesh(planeGeoTrans, planeMatTrans);
+    planeMeshTrans->setPosition(glm::vec3(0.0f, 0.0f, -6.0f));
+    scene->addChild(planeMeshTrans);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);

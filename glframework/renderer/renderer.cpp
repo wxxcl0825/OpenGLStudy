@@ -3,6 +3,7 @@
 #include "../material/whiteMaterial.h"
 
 #include <string>
+#include <algorithm>
 
 Renderer::Renderer() {
     mPhongShader = new Shader("assets/shaders/phong.vert", "assets/shaders/phong.frag");
@@ -26,7 +27,33 @@ void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, 
     glDisable(GL_BLEND); // 默认关闭, 颜色混合开销大, 且无需清理
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    renderObject(scene, camera, dirLight, ambLight);
+    mOpacityObjects.clear();
+    mTransparentObjects.clear();
+    projectObject(scene);
+
+    // 按Z值排序
+    std::sort(mTransparentObjects.begin(), mTransparentObjects.end(), [camera](const Mesh* a, const Mesh* b) {
+        // auto positionA = a->getPosition();  // 相对于父节点位置
+        auto modelMatrixA = a->getModelMatrix();
+        auto worldPositionA = modelMatrixA * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); // 初始时在(0, 0, 0), 使用modelMatrix变换
+        auto viewMatrix = camera->getViewMatrix();
+        auto cameraPositionA = viewMatrix * worldPositionA;
+
+        auto modelMatrixB = b->getModelMatrix();
+        auto worldPositionB = modelMatrixB * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        auto cameraPositionB = viewMatrix * worldPositionB;
+
+        return cameraPositionA.z < cameraPositionB.z;   // 升序排列, 由远及近
+    });
+    
+    // 渲染两个队列, 无需递归(子节点已经被拆出)
+    for (auto mesh: mOpacityObjects)
+        renderObject(mesh, camera, dirLight, ambLight);
+
+    for (auto mesh: mTransparentObjects)
+        renderObject(mesh, camera, dirLight, ambLight);
+
+    // renderObject(scene, camera, dirLight, ambLight);
 }
 
 Shader* Renderer::pickShader(MaterialType type) {
@@ -133,10 +160,10 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
         shader->end();
     }
 
-    auto children = object->getChildren();
-    for (auto child: children) {
-        renderObject(child, camera, dirLight, ambLight);
-    }
+    // auto children = object->getChildren();
+    // for (auto child: children) {
+    //     renderObject(child, camera, dirLight, ambLight);
+    // }
 }
 
 void Renderer::setDepthState(Material* material) {
@@ -182,5 +209,23 @@ void Renderer::setBlendState(Material* material) {
         glBlendFunc(material->mSFactor, material->mDFactor);
     } else {
         glDisable(GL_BLEND);
+    }
+}
+
+void Renderer::projectObject(Object* object) {
+    if (object->getType() == ObjectType::Mesh) {
+        auto mesh = (Mesh *) object;
+        auto material = mesh->mMaterial;
+
+        if (material->mBlend) {
+            mTransparentObjects.push_back(mesh);
+        } else {
+            mOpacityObjects.push_back(mesh);
+        }
+    }
+
+    auto children = object->getChildren();
+    for (auto child: children) {
+        projectObject(child);
     }
 }

@@ -38,4 +38,11 @@ private:
     void setPolygonOffsetState(Material* material);
     void setStencilState(Material* material);
     void setBlendState(Material* material);
+
+    // 透明物体绘制策略: 先绘制不透明物体，再从后往前绘制透明物体
+    // 每一帧绘制前需要清空
+    std::vector<Mesh*> mOpacityObjects{};
+    std::vector<Mesh*> mTransparentObjects{};
+
+    void projectObject(Object* object); // 判断物体透明/不透明, 并放入对应队列中
 };

@@ -42,7 +42,7 @@ void Object::setScale(glm::vec3 scale) {
     mScale = scale;
 }
 
-glm::mat4 Object::getModelMatrix() {
+glm::mat4 Object::getModelMatrix() const {
     glm::mat4 parentModelMatrix{1.0f};
     if (mParent != nullptr)
         parentModelMatrix = mParent->getModelMatrix();
