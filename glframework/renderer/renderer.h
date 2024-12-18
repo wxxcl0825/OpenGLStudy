@@ -41,6 +41,7 @@ private:
     void setPolygonOffsetState(Material* material);
     void setStencilState(Material* material);
     void setBlendState(Material* material);
+    void setFaceCullingState(Material* material);
 
     // 透明物体绘制策略: 先绘制不透明物体，再从后往前绘制透明物体
     // 每一帧绘制前需要清空

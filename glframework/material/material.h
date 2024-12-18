@@ -49,6 +49,11 @@ public:
 
     float mOpacity{1.0f}; // 透明度 = Opacity * 贴图透明度
 
+    // 面剔除
+    bool mFaceCulling{false};
+    unsigned int mFrontFace{GL_CCW};
+    unsigned int mCullFace{GL_BACK};
+
 protected:
     MaterialType mType;
 };

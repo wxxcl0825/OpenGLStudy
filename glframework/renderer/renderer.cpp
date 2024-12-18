@@ -27,6 +27,7 @@ void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, 
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glStencilMask(0xFF);
     glDisable(GL_BLEND); // 默认关闭, 颜色混合开销大, 且无需清理
+    glDisable(GL_CULL_FACE); // 默认关闭, 面剔除无需清理
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     mOpacityObjects.clear();
@@ -104,6 +105,8 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
         setStencilState(material);
         // 设置颜色混合
         setBlendState(material);
+        // 设置面剔除
+        setFaceCullingState(material);
 
 
         Shader* shader = pickShader(material->mType);
@@ -250,6 +253,16 @@ void Renderer::setBlendState(Material* material) {
         glBlendFunc(material->mSFactor, material->mDFactor);
     } else {
         glDisable(GL_BLEND);
+    }
+}
+
+void Renderer::setFaceCullingState(Material* material) {
+    if (material->mFaceCulling) {
+        glEnable(GL_CULL_FACE);
+        glFrontFace(material->mFrontFace);
+        glCullFace(material->mCullFace);
+    } else {
+        glDisable(GL_CULL_FACE);
     }
 }
 
