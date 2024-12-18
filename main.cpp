@@ -21,6 +21,8 @@
 #include "glframework/material/phongMaterial.h"
 #include "glframework/material/whiteMaterial.h"
 #include "glframework/material/opacityMaskMaterial.h"
+#include "glframework/material/screenMaterial.h"
+
 #include "glframework/mesh.h"
 
 #include "glframework/light/directionalLight.h"
@@ -90,12 +92,9 @@ void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    auto geo = Geometry::createPlane(5.0, 5.0);
-    auto mat = new PhongMaterial();
-    mat->mDiffuse = new Texture("assets/textures/grass_.jpg", 0);
-    mat->mFaceCulling = true;
-    mat->mFrontFace = GL_CCW;
-    mat->mCullFace = GL_BACK;
+    auto geo = Geometry::createScreenPlane();
+    auto mat = new ScreenMaterial();
+    mat->mScreenTexture = new Texture("assets/textures/box.png", 0);
     auto mesh = new Mesh(geo, mat);
     scene->addChild(mesh);
 

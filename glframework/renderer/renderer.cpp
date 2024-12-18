@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "../material/phongMaterial.h"
 #include "../material/whiteMaterial.h"
+#include "../material/screenMaterial.h"
 #include "../material/opacityMaskMaterial.h"
 
 #include <string>
@@ -11,6 +12,7 @@ Renderer::Renderer() {
     mWhiteShader = new Shader("assets/shaders/white.vert", "assets/shaders/white.frag");
     mDepthShader = new Shader("assets/shaders/depth.vert", "assets/shaders/depth.frag");
     mOpacityMaskShader = new Shader("assets/shaders/phongOpacityMask.vert", "assets/shaders/phongOpacityMask.frag");
+    mScreenShader = new Shader("assets/shaders/screen.vert", "assets/shaders/screen.frag");
 }
 
 Renderer::~Renderer() {
@@ -74,6 +76,9 @@ Shader* Renderer::pickShader(MaterialType type) {
             break;
         case MaterialType::OpacityMaskMaterial:
             result = mOpacityMaskShader;
+            break;
+        case MaterialType::ScreenMaterial:
+            result = mScreenShader;
             break;
         default:
             break;
@@ -192,6 +197,12 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
 
                 // 透明度
                 shader->setFloat("opacity", material->mOpacity);
+                }
+                break;
+            case MaterialType::ScreenMaterial: {
+                    ScreenMaterial* screenMat = (ScreenMaterial*) material;
+                    shader->setInt("screenTexSampler", 0);
+                    screenMat->mScreenTexture->bind();
                 }
                 break;
             default:
