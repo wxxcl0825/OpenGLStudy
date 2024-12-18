@@ -72,19 +72,26 @@ void prepareCamera() {
     cameraControl->setSensitivity(0.2f);
 }
 
+void setModelBlend(Object* obj, bool blend, float opacity) {
+    if (obj->getType() == ObjectType::Mesh) {
+        Mesh* mesh = (Mesh *) obj;
+        Material* material = mesh->mMaterial;
+        material->mBlend = blend;
+        material->mOpacity = opacity;
+        material->mDepthWrite = false;
+    }
+    auto children = obj->getChildren();
+    for (auto child: children)
+        setModelBlend(child, blend, opacity);
+}
+
 void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    // 绘制透明物体需关闭深度写入(否则后面的物体无法通过深度检测, 无法进入颜色混合阶段)
-    auto boxGeo = Geometry::createBox(4.0f);
-    auto boxMat = new PhongMaterial();
-    boxMat->mDiffuse = new Texture("assets/textures/window.png", 0);
-    boxMat->mBlend = true;
-    boxMat->mDepthWrite = false;
-    boxMat->mOpacity = 0.5f;
-    auto boxMesh = new Mesh(boxGeo, boxMat);
-    scene->addChild(boxMesh);
+    auto model = AssimpLoader::load("assets/obj/bag/backpack.obj");
+    setModelBlend(model, true, 0.5f);
+    scene->addChild(model);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);
