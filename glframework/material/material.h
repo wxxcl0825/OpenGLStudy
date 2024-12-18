@@ -24,7 +24,7 @@ public:
     float mFactor{0.0f};
     float mUnit{0.0f};
 
-    // stencil
+    // 模版检测
     // glEnable(GL_STENCIL_TEST);
     // glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     // glStencilMask(0xFF);  // 保证模版缓冲可清理
@@ -41,6 +41,13 @@ public:
     unsigned int mStencilFunc{GL_ALWAYS}; // 模版测试函数
     int mStencilRef{0}; // 模版测试参考值
     unsigned int mStencilFuncMask{0xFF};
+
+    // 颜色混合
+    bool mBlend{false};
+    unsigned int mSFactor{GL_SRC_ALPHA};
+    unsigned int mDFactor{GL_ONE_MINUS_SRC_ALPHA};
+
+    float mOpacity{1.0f}; // 透明度 = Opacity * 贴图透明度
 
 protected:
     MaterialType mType;

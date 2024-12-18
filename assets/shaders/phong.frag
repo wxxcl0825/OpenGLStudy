@@ -17,6 +17,9 @@ uniform vec3 ambientColor;
 uniform float shiness;
 uniform vec3 cameraPosition;
 
+// 透明度
+uniform float opacity;
+
 struct DirectionalLight {
     vec3 direction;
     vec3 color;
@@ -105,6 +108,7 @@ void main() {
     vec3 result = vec3(0.0);
 
     vec3 objectColor = texture(sampler, uv).xyz;
+    float alpha = texture(sampler, uv).a;
     vec3 normalN = normalize(normal);
     vec3 viewDir = normalize(worldPosition - cameraPosition);
 
@@ -118,5 +122,5 @@ void main() {
 
     vec3 finalColor = result + ambientColor;
     
-    FragColor = vec4(finalColor, 1.0);
+    FragColor = vec4(finalColor, alpha * opacity);
 }

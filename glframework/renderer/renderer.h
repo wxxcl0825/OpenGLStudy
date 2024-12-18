@@ -37,4 +37,5 @@ private:
     void setDepthState(Material* material);
     void setPolygonOffsetState(Material* material);
     void setStencilState(Material* material);
+    void setBlendState(Material* material);
 };

@@ -76,35 +76,15 @@ void prepare() {
     renderer = new Renderer();
     scene = new Scene();
 
-    // 普通方块
-    auto geometry = Geometry::createBox(4);
-    auto materialA = new PhongMaterial();
-    materialA->mDiffuse = new Texture("assets/textures/noir.png", 0);
-    materialA->mStencilTest = true;
-    materialA->mSFail = GL_KEEP;
-    materialA->mZFail = GL_KEEP;
-    materialA->mZPass = GL_REPLACE;
-    materialA->mStencilMask = 0xFF;
-    materialA->mStencilFunc = GL_ALWAYS;
-    materialA->mStencilRef = 1;
-    materialA->mStencilFuncMask = 0xFF;
-    auto meshA = new Mesh(geometry, materialA);
-    scene->addChild(meshA);
-
-    // 钩边方块
-    auto materialABound = new WhiteMaterial();
-    auto meshABound = new Mesh(geometry, materialABound);
-    materialABound->mStencilTest = true;
-    materialABound->mSFail = GL_KEEP;
-    materialABound->mZFail = GL_KEEP;
-    materialABound->mZPass = GL_KEEP;
-    materialABound->mStencilMask = 0x00;
-    materialABound->mStencilFunc = GL_NOTEQUAL;
-    materialABound->mStencilRef = 1;
-    materialABound->mStencilFuncMask = 0xFF;
-    meshABound->setPosition(meshA->getPosition());
-    meshABound->setScale(glm::vec3(1.2f));
-    scene->addChild(meshABound);
+    // 绘制透明物体需关闭深度写入(否则后面的物体无法通过深度检测, 无法进入颜色混合阶段)
+    auto boxGeo = Geometry::createBox(4.0f);
+    auto boxMat = new PhongMaterial();
+    boxMat->mDiffuse = new Texture("assets/textures/window.png", 0);
+    boxMat->mBlend = true;
+    boxMat->mDepthWrite = false;
+    boxMat->mOpacity = 0.5f;
+    auto boxMesh = new Mesh(boxGeo, boxMat);
+    scene->addChild(boxMesh);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);

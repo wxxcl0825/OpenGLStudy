@@ -21,8 +21,9 @@ void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDisable(GL_POLYGON_OFFSET_LINE);
     glEnable(GL_STENCIL_TEST);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
     glStencilMask(0xFF);
+    glDisable(GL_BLEND); // 默认关闭, 颜色混合开销大, 且无需清理
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     renderObject(scene, camera, dirLight, ambLight);
@@ -64,6 +65,8 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
         setPolygonOffsetState(material);
         // 设置模版测试
         setStencilState(material);
+        // 设置颜色混合
+        setBlendState(material);
 
 
         Shader* shader = pickShader(material->mType);
@@ -101,6 +104,9 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
                 // 法线矩阵
                 glm::mat4 normalMatrix = glm::transpose(glm::inverse(mesh->getModelMatrix()));
                 shader->setMatrix3x3("normalMatrix", glm::mat3(normalMatrix));
+
+                // 透明度
+                shader->setFloat("opacity", material->mOpacity);
                 }
                 break;
             case MaterialType::WhiteMaterial: {
@@ -167,5 +173,14 @@ void Renderer::setStencilState(Material* material) {
         glStencilFunc(material->mStencilFunc, material->mStencilRef, material->mStencilFuncMask);
     } else {
         glDisable(GL_STENCIL_TEST);
+    }
+}
+
+void Renderer::setBlendState(Material* material) {
+    if (material->mBlend) {
+        glEnable(GL_BLEND);
+        glBlendFunc(material->mSFactor, material->mDFactor);
+    } else {
+        glDisable(GL_BLEND);
     }
 }
