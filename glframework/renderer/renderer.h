@@ -22,7 +22,9 @@ public:
         Scene* scene,
         Camera* camera,
         DirectionalLight* dirLight,
-        AmbientLight* ambLight);
+        AmbientLight* ambLight,
+        unsigned int fbo = 0    // 帧缓冲选择
+        );
 
     void renderObject(Object* object, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight); // 渲染一个物体(及其子节点)
 

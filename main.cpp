@@ -31,12 +31,17 @@
 
 #include "glframework/renderer/renderer.h"
 
+#include "glframework/frameBuffer/frameBuffer.h"
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+int WIDTH = 1600, HEIGHT = 1200;
+
 Renderer* renderer = nullptr;
-Scene* scene = nullptr;
+Scene* sceneOffscreen = nullptr;
+Scene* sceneInscreen = nullptr;
 Camera* camera = nullptr;
 CameraControl* cameraControl = nullptr;
 
@@ -44,6 +49,8 @@ DirectionalLight* dirLight = nullptr;
 AmbientLight* ambLight = nullptr;
 
 glm::vec3 clearColor{};
+
+FrameBuffer* frameBuffer = nullptr;
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -90,13 +97,24 @@ void setModelBlend(Object* obj, bool blend, float opacity) {
 
 void prepare() {
     renderer = new Renderer();
-    scene = new Scene();
+    sceneOffscreen = new Scene();
+    sceneInscreen = new Scene();
 
+    frameBuffer = new FrameBuffer(WIDTH, HEIGHT);
+
+    // Pass1: 离屏渲染
+    auto boxGeo = Geometry::createBox(1.0f);
+    auto boxMat = new PhongMaterial();
+    boxMat->mDiffuse = new Texture("assets/textures/grass_.jpg", 0);
+    auto boxMesh = new Mesh(boxGeo, boxMat);
+    sceneOffscreen->addChild(boxMesh);
+
+    // Pass2: 贴屏渲染
     auto geo = Geometry::createScreenPlane();
     auto mat = new ScreenMaterial();
-    mat->mScreenTexture = new Texture("assets/textures/box.png", 0);
+    mat->mScreenTexture = frameBuffer->mColorAttachment;
     auto mesh = new Mesh(geo, mat);
-    scene->addChild(mesh);
+    sceneInscreen->addChild(mesh);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);
@@ -134,7 +152,7 @@ void renderIMGUI() {
 }
 
 int main() {    
-    if (!glApp->init(800, 600))
+    if (!glApp->init(WIDTH, HEIGHT))
         return -1;
 
     glApp->setResizeCallback(OnResize);
@@ -144,7 +162,7 @@ int main() {
     glApp->setScrollCallback(onScroll);
 
     // 设置openGL视口并清理颜色
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, WIDTH, HEIGHT);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
     prepare();
@@ -155,7 +173,10 @@ int main() {
     while (glApp->update()) {
         cameraControl->update();
         renderer->setClearColor(clearColor);
-        renderer->render(scene, camera, dirLight, ambLight);
+        // pass1: 将box渲染到FBO
+        renderer->render(sceneOffscreen, camera, dirLight, ambLight, frameBuffer->mFBO);
+        // pass2: 将colorAttachment绘制到屏幕
+        renderer->render(sceneInscreen, camera, dirLight, ambLight);
         renderIMGUI();
     }
 

@@ -19,7 +19,9 @@ Renderer::~Renderer() {
 
 }
 
-void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight) {    
+void Renderer::render(Scene* scene, Camera* camera, DirectionalLight* dirLight, AmbientLight* ambLight, unsigned int fbo) {  
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
