@@ -13,6 +13,7 @@ public:
 
     Texture();
     Texture(const std::string& path, unsigned int unit);
+    Texture(const std::vector<std::string>& paths, unsigned int unit);
     Texture(unsigned int unit, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn);
     Texture(unsigned int width, unsigned int height, unsigned int unit); // 空纹理
     ~Texture();
@@ -29,6 +30,7 @@ private:
     int mWidth{0};
     int mHeight{0};
     unsigned int mUnit{0};  // 使用: GL_TEXTURE0 + mUnit
+    unsigned int mTextureTarget{GL_TEXTURE_2D};  // 纹理类型
 
     static std::map<std::string, Texture*> mTextureCache;   // 纹理缓存(静态) 路径 -> 纹理
 };

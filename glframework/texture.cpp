@@ -2,6 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #include "../wrapper/checkError.h"
+#include <iostream>
 
 std::map<std::string, Texture*> Texture::mTextureCache{};
 
@@ -79,6 +80,36 @@ Texture::Texture(const std::string& path, unsigned int unit) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);   // v 方向
 }
 
+// 右左上下后前
+Texture::Texture(const std::vector<std::string>& paths, unsigned int unit) {
+    mUnit = unit;
+    mTextureTarget = GL_TEXTURE_CUBE_MAP;
+
+    stbi_set_flip_vertically_on_load(false);  // cubemap 无需翻转y轴
+
+    GL_CALL(glGenTextures(1, &mTexture));
+    GL_CALL(glActiveTexture(GL_TEXTURE0 + mUnit));
+    GL_CALL(glBindTexture(GL_TEXTURE_CUBE_MAP, mTexture));
+
+    int width, height, channels;
+    for (int i = 0; i < paths.size(); i++) {
+        unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, STBI_rgb_alpha);
+        if (data) {
+            GL_CALL(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+            stbi_image_free(data);
+        } else {
+            std::cerr << "Cubemap texture failed to load at path: " << paths[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+
+    glTexParameteri(mTextureTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(mTextureTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(mTextureTarget, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(mTextureTarget, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(mTextureTarget, GL_TEXTURE_WRAP_R, GL_REPEAT);
+}
+
 Texture::Texture(unsigned int unit, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn) {
     mUnit = unit;
     
@@ -133,5 +164,5 @@ Texture::~Texture() {
 
 void Texture::bind() {
     GL_CALL(glActiveTexture(GL_TEXTURE0 + mUnit));  //  先切换纹理单元
-    glBindTexture(GL_TEXTURE_2D, mTexture);
+    glBindTexture(mTextureTarget, mTexture);
 }

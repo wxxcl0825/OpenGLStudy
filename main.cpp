@@ -22,6 +22,7 @@
 #include "glframework/material/whiteMaterial.h"
 #include "glframework/material/opacityMaskMaterial.h"
 #include "glframework/material/screenMaterial.h"
+#include "glframework/material/cubeMaterial.h"
 
 #include "glframework/mesh.h"
 
@@ -40,8 +41,7 @@
 int WIDTH = 800, HEIGHT = 600;
 
 Renderer* renderer = nullptr;
-Scene* sceneOffscreen = nullptr;
-Scene* sceneInscreen = nullptr;
+Scene* scene = nullptr;
 Camera* camera = nullptr;
 CameraControl* cameraControl = nullptr;
 
@@ -97,24 +97,29 @@ void setModelBlend(Object* obj, bool blend, float opacity) {
 
 void prepare() {
     renderer = new Renderer();
-    sceneOffscreen = new Scene();
-    sceneInscreen = new Scene();
+    scene = new Scene();
 
-    frameBuffer = new FrameBuffer(WIDTH, HEIGHT);
+    std::vector<std::string> paths = {
+        "assets/textures/skybox/right.jpg",
+        "assets/textures/skybox/left.jpg",
+        "assets/textures/skybox/top.jpg",
+        "assets/textures/skybox/bottom.jpg",
+        "assets/textures/skybox/back.jpg",
+        "assets/textures/skybox/front.jpg"
+    };
 
-    // Pass1: 离屏渲染
     auto boxGeo = Geometry::createBox(1.0f);
-    auto boxMat = new PhongMaterial();
-    boxMat->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    auto boxMat = new CubeMaterial();
+    boxMat->mDiffuse = new Texture(paths, 0);
+    // boxMat->mDepthWrite = false;    // 若绘制天空盒, 需关闭深度写入(或让shader使用输出深度值=1)
     auto boxMesh = new Mesh(boxGeo, boxMat);
-    sceneOffscreen->addChild(boxMesh);
+    scene->addChild(boxMesh);
 
-    // Pass2: 贴屏渲染
-    auto geo = Geometry::createScreenPlane();
-    auto mat = new ScreenMaterial(); // 后处理
-    mat->mScreenTexture = frameBuffer->mColorAttachment;
-    auto mesh = new Mesh(geo, mat);
-    sceneInscreen->addChild(mesh);
+    auto sphereGeo = Geometry::createSphere(4.0f);
+    auto sphereMat = new PhongMaterial();
+    sphereMat->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    auto sphereMesh = new Mesh(sphereGeo, sphereMat);
+    scene->addChild(sphereMesh);
 
     dirLight = new DirectionalLight();
     dirLight->mDirection = glm::vec3(-1.0f);
@@ -173,10 +178,7 @@ int main() {
     while (glApp->update()) {
         cameraControl->update();
         renderer->setClearColor(clearColor);
-        // pass1: 将box渲染到FBO
-        renderer->render(sceneOffscreen, camera, dirLight, ambLight, frameBuffer->mFBO);
-        // pass2: 将colorAttachment绘制到屏幕
-        renderer->render(sceneInscreen, camera, dirLight, ambLight);
+        renderer->render(scene, camera, dirLight, ambLight);
         renderIMGUI();
     }
 

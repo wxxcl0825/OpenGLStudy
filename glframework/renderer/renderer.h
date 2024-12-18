@@ -38,6 +38,7 @@ private:
     Shader* mDepthShader{nullptr};
     Shader* mOpacityMaskShader{nullptr};
     Shader* mScreenShader{nullptr};
+    Shader* mCubeShader{nullptr};
 
     Shader* pickShader(MaterialType type);
     void setDepthState(Material* material);

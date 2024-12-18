@@ -3,6 +3,7 @@
 #include "../material/whiteMaterial.h"
 #include "../material/screenMaterial.h"
 #include "../material/opacityMaskMaterial.h"
+#include "../material/cubeMaterial.h"
 
 #include <string>
 #include <algorithm>
@@ -13,6 +14,7 @@ Renderer::Renderer() {
     mDepthShader = new Shader("assets/shaders/depth.vert", "assets/shaders/depth.frag");
     mOpacityMaskShader = new Shader("assets/shaders/phongOpacityMask.vert", "assets/shaders/phongOpacityMask.frag");
     mScreenShader = new Shader("assets/shaders/screen.vert", "assets/shaders/screen.frag");
+    mCubeShader = new Shader("assets/shaders/cube.vert", "assets/shaders/cube.frag");
 }
 
 Renderer::~Renderer() {
@@ -81,6 +83,9 @@ Shader* Renderer::pickShader(MaterialType type) {
             break;
         case MaterialType::ScreenMaterial:
             result = mScreenShader;
+            break;
+        case MaterialType::CubeMaterial:
+            result = mCubeShader;
             break;
         default:
             break;
@@ -204,10 +209,17 @@ void Renderer::renderObject(Object* object, Camera* camera, DirectionalLight* di
             case MaterialType::ScreenMaterial: {
                     ScreenMaterial* screenMat = (ScreenMaterial*) material;
                     shader->setInt("screenTexSampler", 0);
-                    // 临时设置
-                    shader->setFloat("texWidth", 800);
-                    shader->setFloat("texHeight", 600);
                     screenMat->mScreenTexture->bind();
+                }
+                break;
+            case MaterialType::CubeMaterial: {
+                CubeMaterial* cubeMat = (CubeMaterial*) material;
+                mesh->setPosition(camera->mPosition);   // 跟着相机动
+                shader->setMatrix4x4("modelMatrix", mesh->getModelMatrix());
+                shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
+                shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
+                shader->setInt("cubeSampler", 0);
+                cubeMat->mDiffuse->bind();
                 }
                 break;
             default:

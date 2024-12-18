@@ -44,5 +44,5 @@ vec3 blur() {
 }
 
 void main() { 
-    FragColor = vec4(blur(), 1.0);
+    FragColor = vec4(texture(screenTexSampler, uv).rgb, 1.0);
 }

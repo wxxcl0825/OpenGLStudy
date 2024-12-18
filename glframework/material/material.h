@@ -3,7 +3,7 @@
 #include "../core.h"
 
 enum class MaterialType {
-    PhongMaterial, WhiteMaterial, DepthMaterial, OpacityMaskMaterial, ScreenMaterial
+    PhongMaterial, WhiteMaterial, DepthMaterial, OpacityMaskMaterial, ScreenMaterial, CubeMaterial
 };
 
 class Renderer;
@@ -16,7 +16,7 @@ public:
 
     // 深度检测
     bool mDepthTest{ true };
-    GLenum mDepthFunc{ GL_LESS };
+    GLenum mDepthFunc{ GL_LEQUAL }; // 原背景深度也为1, 为了让1.0通过测试, 盖住背景, 设置为GL_LEQUAL
     bool mDepthWrite { true };
 
     bool mPolygonOffset{false};
