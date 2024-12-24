@@ -120,9 +120,19 @@ void Shader::setVector3(const std::string &name, float* values) {
     GL_CALL(glUniform3fv(location, 1, values));
 }
 
+void Shader::setVector3(const std::string &name, const glm::vec3 value) {
+    GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
+    GL_CALL(glUniform3f(location, value.x, value.y, value.z));
+}
+
 void Shader::setInt(const std::string &name, int value) {
     GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
     GL_CALL(glUniform1i(location, value));
+}
+
+void Shader::setMatrix3x3(const std::string &name, glm::mat3 value) {
+    GLint location = GL_CALL(glGetUniformLocation(mProgram, name.c_str()));
+    GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
 
 void Shader::setMatrix4x4(const std::string &name, glm::mat4 value) {

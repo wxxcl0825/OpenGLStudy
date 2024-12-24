@@ -4,7 +4,7 @@
 #include <cstdint>
 
 
-#define app Application::getInstance()
+#define glApp Application::getInstance()
 
 using ResizeCallback = void(*)(int width, int height);
 using KeyBoardCallback = void(*)(int key, int action, int mods);
@@ -37,6 +37,7 @@ public:
   uint32_t getHeight() const { return mHeight; };
 
   void getCursorPosition(double *x, double *y);
+  GLFWwindow* getWindow() { return mWindow; }
 
   void setResizeCallback(ResizeCallback callback) { mResizeCallback = callback; };
   void setKeyBoardCallback(KeyBoardCallback callback) { mKeyBoardCallback = callback; }

@@ -15,23 +15,43 @@
 #include "application/camera/gameCameraControl.h"
 #include "application/camera/trackBallCameraControl.h"
 
-// GLuint vao;
-Shader* shader = nullptr;
-// Texture* grassTexture = nullptr;
-// Texture* landTexture = nullptr;
-// Texture* noiseTexture = nullptr;
-Texture* texture = nullptr;
-glm::mat4 transform(1.0);
-glm::mat4 viewMatrix(1.0f);
-glm::mat4 orthoMatrix(1.0f);
-glm::mat4 perspectiveMatrix(1.0f);
+#include "application/assimpLoader.h"
 
-PerspectiveCamera* camera = nullptr;
-// OrthographicCamera* camera = nullptr;
-// TrackBallCameraControl* cameraControl = nullptr;
-GameCameraControl* cameraControl = nullptr;
+#include "glframework/material/material.h"
+#include "glframework/material/phongMaterial.h"
+#include "glframework/material/whiteMaterial.h"
+#include "glframework/material/opacityMaskMaterial.h"
+#include "glframework/material/screenMaterial.h"
+#include "glframework/material/cubeMaterial.h"
+#include "glframework/material/phongEnvMaterial.h"
 
-Geometry* geometry = nullptr;
+#include "glframework/mesh.h"
+
+#include "glframework/light/directionalLight.h"
+#include "glframework/light/ambientLight.h"
+#include "glframework/light/pointLight.h"
+
+#include "glframework/renderer/renderer.h"
+
+#include "glframework/frameBuffer/frameBuffer.h"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+int WIDTH = 800, HEIGHT = 600;
+
+Renderer* renderer = nullptr;
+Scene* scene = nullptr;
+Camera* camera = nullptr;
+CameraControl* cameraControl = nullptr;
+
+DirectionalLight* dirLight = nullptr;
+AmbientLight* ambLight = nullptr;
+
+glm::vec3 clearColor{};
+
+FrameBuffer* frameBuffer = nullptr;
 
 void OnResize(int width, int height) {
     GL_CALL(glViewport(0, 0, width, height));
@@ -43,7 +63,7 @@ void onKey(int key, int action, int mods) {
 
 void onMouse(int button, int action, int mods) {
     double x = 0, y = 0;
-    app->getCursorPosition(&x, &y);
+    glApp->getCursorPosition(&x, &y);
     cameraControl->onMouse(button, action, x, y);
 }
 
@@ -55,127 +75,105 @@ void onScroll(double offset) {
     cameraControl->onScroll(offset);
 }
 
-void doRotationTransform() {
-    transform = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));  // 角度为float, 弧度
-}
-
-void doTranslationTransform() {
-    transform = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
-}
-
-void doScaleTransform() {
-    transform = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.0f));
-}
-
-void doTransform() {
-    float angle = 1.0f;
-    /* 
-        glm叠加变换相对于本地坐标系
-        1. 旋转变换: 相对于图形中心
-        2. 移动变换: 相对于缩放大小
-    */
-    transform = glm::rotate(transform, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
-}
-
-float angle = 0.0f;
-void doRotation() {
-    angle += 2.0f;
-    transform = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0, 0.0, 1.0)); 
-}
-
-void prepareVAO() {
-    geometry = Geometry::createSphere(6.0f);
-}
-
-void prepareShader() {
-    shader = new Shader("assets/shaders/vertex.vert", "assets/shaders/fragment.frag");
-}
-
-void prepareTexture() {
-    // grassTexture = new Texture("assets/textures/grass.jpg", 0);
-    // landTexture = new Texture("assets/textures/land.jpg", 1);
-    // noiseTexture = new Texture("assets/textures/noise.png", 2);
-    texture = new Texture("assets/textures/noir.png", 0);
-}
-
 void prepareCamera() {
-    camera = new PerspectiveCamera(60.0f, (float)(app->getWidth()) / (float)(app->getHeight()), 0.1f, 1000.0f);
+    camera = new PerspectiveCamera(60.0f, (float)(glApp->getWidth()) / (float)(glApp->getHeight()), 0.1f, 1000.0f);
     // cameraControl = new TrackBallCameraControl();
     cameraControl = new GameCameraControl();
     cameraControl->setCamera(camera);
     cameraControl->setSensitivity(0.2f);
 }
 
-void prepareState() {
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    // glDepthFunc(GL_GREATER);
-    // glClearDepth(0.0f);
+void setModelBlend(Object* obj, bool blend, float opacity) {
+    if (obj->getType() == ObjectType::Mesh) {
+        Mesh* mesh = (Mesh *) obj;
+        Material* material = mesh->mMaterial;
+        material->mBlend = blend;
+        material->mOpacity = opacity;
+        material->mDepthWrite = false;
+    }
+    auto children = obj->getChildren();
+    for (auto child: children)
+        setModelBlend(child, blend, opacity);
 }
 
-void render() {
-    // 清理画布
-    GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+void prepare() {
+    renderer = new Renderer();
+    scene = new Scene();
 
-    // 渲染操作
-    // 绑定program(选择材质)
-    shader->begin();
+    auto boxGeo = Geometry::createBox(1.0f);
+    auto boxMat = new CubeMaterial();
+    boxMat->mDiffuse = new Texture("assets/textures/sphericalMap.jpg", 0);
+    // boxMat->mDepthWrite = false;    // 若绘制天空盒, 需关闭深度写入(或让shader使用输出深度值=1)
+    auto boxMesh = new Mesh(boxGeo, boxMat);
+    scene->addChild(boxMesh);
 
-    // 切换贴图, 切换Shader Uniform变量, 切换vao, 绘制
-    texture->bind();
-    // shader->setFloat("time", glfwGetTime());    // vs, fs变量重名时, 合二为一
-    // shader->setVector3("uColor", 0.3, 0.4, 0.5);
-    // shader->setInt("grassSampler", 0);
-    // shader->setInt("landSampler", 1);
-    // shader->setInt("noiseSampler", 2);
-    shader->setInt("sampler", 0);
-    // shader->setFloat("width", texture->getWidth());
-    // shader->setFloat("height", texture->getHeight());
-    shader->setMatrix4x4("transform", transform);
-    shader->setMatrix4x4("viewMatrix", camera->getViewMatrix());
-    shader->setMatrix4x4("projectionMatrix", camera->getProjectionMatrix());
+    auto sphereGeo = Geometry::createSphere(4.0f);
+    auto sphereMat = new PhongMaterial();
+    sphereMat->mDiffuse = new Texture("assets/textures/noir.png", 0);
+    auto sphereMesh = new Mesh(sphereGeo, sphereMat);
+    scene->addChild(sphereMesh);
 
-    // 绑定vao(选择几何信息)
-    glBindVertexArray(geometry->getVao());
-
-    // 发出绘制指令
-    // glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawElements(GL_TRIANGLES, geometry->getIndicesCount(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    dirLight = new DirectionalLight();
+    dirLight->mDirection = glm::vec3(-1.0f);
+    dirLight->mSpecularIntensity = 0.1f;
     
-    shader->end();
+    ambLight = new AmbientLight();
+    ambLight->mColor = glm::vec3(0.1f);
+}
+
+void initIMGUI() {
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGlfw_InitForOpenGL(glApp->getWindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 410");
+}
+
+void renderIMGUI() {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Hello, world!");
+    ImGui::Text("ChangeColor Demo");
+    ImGui::Button("Test Button", ImVec2(40, 20));
+    ImGui::ColorEdit3("Clear Color", (float *) &clearColor);
+    ImGui::End();
+
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(glApp->getWindow(), &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 int main() {    
-    if (!app->init(800, 600))
+    if (!glApp->init(WIDTH, HEIGHT))
         return -1;
 
-    app->setResizeCallback(OnResize);
-    app->setKeyBoardCallback(onKey);
-    app->setMouseCallback(onMouse);
-    app->setCursorCallback(onCursor);
-    app->setScrollCallback(onScroll);
+    glApp->setResizeCallback(OnResize);
+    glApp->setKeyBoardCallback(onKey);
+    glApp->setMouseCallback(onMouse);
+    glApp->setCursorCallback(onCursor);
+    glApp->setScrollCallback(onScroll);
 
     // 设置openGL视口并清理颜色
-    glViewport(0, 0, 800, 600);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
+    glViewport(0, 0, WIDTH, HEIGHT);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);   // 设置用于Clear时的颜色, 以便在Clear时将整个画布设置为该颜色
 
-    prepareShader();
-    prepareVAO();
-    prepareTexture();
+    prepare();
     prepareCamera();
-    prepareState();
+    initIMGUI();
 
     // 执行窗体循环
-    while (app->update()) {
+    while (glApp->update()) {
         cameraControl->update();
-        render();
-        // doTransform();
+        renderer->setClearColor(clearColor);
+        renderer->render(scene, camera, dirLight, ambLight);
+        renderIMGUI();
     }
 
-    app->destroy();
-    // delete grassTexture;
-    // delete landTexture;
-    delete texture;
+    glApp->destroy();
     return 0;
 }
